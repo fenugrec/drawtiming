@@ -1,5 +1,7 @@
 2004-09-14    <ecounce@users.sourceforge.net>
 
+	* Added rudimentary exception handling at toplevel
+
 	* Added Makefile.freebsd for compiling on FreeBSD.
 
 	* Fixed license notice in source files.
