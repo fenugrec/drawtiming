@@ -4,18 +4,12 @@ This project provides a command line tool for documenting hardware and
 software designs through timing diagrams.  It includes a parser for
 reading an intuitive ASCII signal description from an input file, and
 uses the ImageMagick Magick++ API for rasterizing and outputting an
-image of an ideal timing diagram.  Notation typical of timing diagrams
+image of a timing diagram.  Notation typical of timing diagrams
 found in the Electrical Engineering discipline, including the signal
 state transitions with arrows indicating causal relationships between
 signals is generated.  I am not aware of any noncommercial application
 to perform a similiar function.  It is written in C++, and has been
 tested on Linux, FreeBSD and Cygwin.  
-
-If you aren't sure what I mean by ideal timing diagrams, then take a
-look at the project homepage (http://drawtiming.sourceforge.net) or
-take a look in the "samples" directory after running "make check" on
-this package.  An ideal timing diagram does not convey propigation
-delays between signal transitions.
 
 I use this software to document the design of hardware and software
 projects.  I find the resulting timing diagrams to be a good
