@@ -1,2 +1,2 @@
-SUBDIRS = src 
-EXTRA_DIST = samples/Makefile samples/turnup.txt
+SUBDIRS = src doc
+EXTRA_DIST = samples/Makefile samples/turnup.txt samples/sample.txt

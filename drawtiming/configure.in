@@ -20,4 +20,4 @@ AC_SUBST(MAGICK_LDFLAGS)
 AC_SUBST(MAGICK_LIBS)
 
 AC_C_CONST
-AC_OUTPUT(Makefile src/Makefile)
+AC_OUTPUT(Makefile src/Makefile doc/Makefile)

@@ -6,3 +6,5 @@ mkinstalldirs
 missing
 stamp-h.in
 Makefile.in
+depcomp
+autom4te.cache

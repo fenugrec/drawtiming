@@ -1,5 +1,5 @@
 
-all: turnup.gif
+all: turnup.gif sample.gif
 
 .txt.gif:
 	../src/drawtiming -o $@ $<
