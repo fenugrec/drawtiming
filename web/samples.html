@@ -171,13 +171,12 @@
 file format:<br>
       <br>
       </p>
-      <pre style="background-color: rgb(204, 204, 204);"># initialize the signals<br>POWER=0, FIRE=0, ARMED=0, LED=OFF.<br># turn on the power<br>POWER=1 =&gt; LED=GREEN.<br># fire once to arm<br>FIRE=1.<br>FIRE =&gt; ARMED=1.<br>FIRE=0.<br># fire a second time<br>FIRE=1.<br>FIRE, ARMED =&gt; LED=RED;<br>FIRE =&gt; ARMED=0.</pre>
+      <pre style="background-color: rgb(204, 204, 204);"># initialize the signals<br>POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.<br># turn on the power<br>POWER=1 =&gt; LED=GREEN.<br># fire once to arm<br>FIRE=1.<br>FIRE =&gt; ARMED=1.<br>FIRE=0.<br># fire a second time<br>FIRE=1.<br>FIRE, ARMED =&gt; LED=RED;<br>FIRE =&gt; COUNT="N+1".</pre>
       <p><span style="font-weight: bold;"></span>Here is the resulting
 output image:</p>
-      <img alt="Sample output image" src="sample.gif"
- style="width: 509px; height: 128px;">
+      <img alt="Sample output image" src="sample.gif">
       <p><br>
-This input file descibes the changes in four signals over a
+This input file descibes the changes in five signals over a
 period of seven clock cycles.&nbsp; The end of each clock cycle is
 indicated with a period.&nbsp; For example, the following line
 indicates a single signal, named FIRE, became true during a clock
@@ -214,9 +213,9 @@ dependencies with commas: </p>
       <p>Sometimes, a single dependency causes multiple independent
 signals to
 change.&nbsp; Use a semicolon to start a new list of dependencies.
-Modifying the previous line to indicate that FIRE also causes ARMED to
-reset yields: </p>
-      <pre style="margin-left: 40px;">FIRE, ARMED =&gt; LED=RED;<br>FIRE =&gt; ARMED=0.<br></pre>
+Modifying the previous line to indicate that FIRE also causes COUNT to
+increment yields: </p>
+      <pre style="margin-left: 40px;">FIRE, ARMED =&gt; LED=RED;<br>FIRE =&gt; COUNT="N+1".<br></pre>
       <br>
       <hr style="width: 100%; height: 2px;">
       <h2><span style="font-weight: bold;"></span>OCH TURNUP</h2>

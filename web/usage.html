@@ -215,9 +215,8 @@ and periods indicate the end of a clock cycle.&nbsp; <br>
         <dd>This statement changes the value of a signal at the
 beginning of
 the current clock, and adds it to the list of signal
-dependencies.&nbsp; Both the signal and the value have the same format,
-which consists of alphanumeric words optionally combined with "."
-periods.</dd>
+dependencies.&nbsp; The signal name may consist of one or more
+alphanumeric words joined by periods.</dd>
         <dt style="font-weight: bold;">SIGNAL</dt>
         <dd>This statement adds a signal to the list of dependencies
 without
@@ -238,8 +237,7 @@ increments the clock.</dd>
 the
 current list of dependencies and then resets the dependency list.</dd>
       </dl>
-      <p>
-      <br>
+      <p> <br>
 Signal values are rendered according to the following rules:<br>
       </p>
       <dl>
@@ -256,9 +254,11 @@ and <span style="font-weight: bold;">false</span></dt>
         <dd>a don't care value.</dd>
         <dt style="font-weight: bold;">Z</dt>
         <dd>a tristate value.</dd>
-        <dt><span style="font-style: italic;">ABC</span><br>
+        <dt><span style="font-style: italic;">"ABC"</span><br>
         </dt>
-        <dd>Anything else is rendered as a state.</dd>
+        <dd>Any other alphanumeric token, or text enclosed in quotes is
+rendered as a state.<br>
+        </dd>
       </dl>
       </td>
       <td style="vertical-align: top;"><br>
