@@ -75,15 +75,21 @@ int main (int argc, char *argv[]) {
   if (verbose)
     cout << data;
 
-  timing::diagram diagram;
-  diagram.push_back (DrawablePushGraphicContext ());
-  diagram.push_back (DrawableScaling (scale, scale));
-  diagram.render (data);
-  diagram.push_back (DrawablePopGraphicContext ());
+  try {
+    timing::diagram diagram;
+    diagram.push_back (DrawablePushGraphicContext ());
+    diagram.push_back (DrawableScaling (scale, scale));
+    diagram.render (data);
+    diagram.push_back (DrawablePopGraphicContext ());
 
-  Image img (Geometry ((int)(scale*diagram.width), (int)(scale*diagram.height)), "white");
-  img.draw (diagram);
-  img.write (outfile);
+    Image img (Geometry ((int)(scale*diagram.width), (int)(scale*diagram.height)), "white");
+    img.draw (diagram);
+    img.write (outfile);
+  }
+  catch (Exception &err) {
+    cerr << "caught exception: " << err.what () << endl;
+    return 2;
+  }
 
   return 0;
 }
