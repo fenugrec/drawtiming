@@ -1,4 +1,15 @@
+2004-09-20  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* Release 0.2
+
+	* made scale a property of timing::diagram and moved supporting
+	code into that class.
+
+	* added man page.
+
 2004-09-15  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* Release 0.1
 
 	* Restructured for autoconf/automake.
 

@@ -1,5 +1,5 @@
 AC_INIT(src/main.cc)
-AM_INIT_AUTOMAKE(drawtiming,0.1,ecounce@users.sourceforge.net)
+AM_INIT_AUTOMAKE(drawtiming,0.2,ecounce@users.sourceforge.net)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CXX
