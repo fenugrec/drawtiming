@@ -1,6 +1,6 @@
 Summary: A command line tool for generating ideal timing diagrams.
 Name: drawtiming
-Version: 0.3
+Version: 0.4
 Release: 1
 Copyright: GPL
 Group: Productivity/Graphics/CAD
@@ -44,6 +44,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/bin/drawtiming
 
 %changelog
+* Fri Sep 24 2004 - ecounce@users.sourceforge.net
+- update package to 0.4
 * Wed Sep 22 2004 - ecounce@users.sourceforge.net
 - update package to 0.3
 * Wed Sep 22 2004 - ecounce@users.sourceforge.net
