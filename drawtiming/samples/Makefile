@@ -1,5 +1,7 @@
 
 all: turnup.gif
 
-%.gif: %.txt
-	drawtiming --output $@ $<
+.txt.gif:
+	../src/drawtiming -o $@ $<
+
+.SUFFIXES: .gif .txt

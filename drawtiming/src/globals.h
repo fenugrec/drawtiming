@@ -1,4 +1,5 @@
-/* Copyright (c)2004 by Edward Counce, All rights reserved. 
+// -*- mode: c++; -*-
+// Copyright (c)2004 by Edward Counce, All rights reserved
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -14,26 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with drawtiming; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
 
-%{
-#include <string>
-#define YYSTYPE std::string
-#include "infile.tab.h"
-%}
+#ifndef __GLOBALS_H
+#define __GLOBALS_H
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+#include "timing.h"
 
-%option yylineno
-%option noyywrap
-%x COMMENT
-SYM [A-Za-z0-9_]+
+extern unsigned n;
+extern timing::data data;
+extern timing::siglist deps;
 
-%%
-
-<COMMENT>\n     BEGIN(INITIAL); 
-<COMMENT>.*     ;
-
-{SYM}(\.{SYM})* yylval = std::string (yytext, yyleng); return SYMBOL;
-=>              return CAUSE;
-#               BEGIN(COMMENT);
-[\n\t ]+        ;
-.               return yytext[0];
+#endif

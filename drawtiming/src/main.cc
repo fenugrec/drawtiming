@@ -16,7 +16,13 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "globals.h"
-#include <getopt.h>
+#ifdef HAVE_GETOPT_H
+#  include <getopt.h>
+#  define GETOPT_LONG getopt_long
+#else
+#  include <unistd.h>
+#  define GETOPT_LONG(C,V,S,O,I) getopt(C,V,S)
+#endif
 using namespace std;
 using namespace Magick;
 
@@ -28,19 +34,21 @@ unsigned n;
 timing::data data;
 timing::siglist deps;
 double scale = 1.0;
-string outfile = "/dev/null";
+string outfile;
 int verbose = 0;
 
+#ifdef HAVE_GETOPT_H
 struct option opts[] = {
   {"output", required_argument, NULL, 'o'},
   {"scale", required_argument, NULL, 'x'},
   {"verbose", no_argument, NULL, 'v'},
   {0, 0, 0, 0}
 };
+#endif
 
 int main (int argc, char *argv[]) {
   int k, c;
-  while ((c = getopt_long (argc, argv, "o:vx:", opts, &k)) != -1)
+  while ((c = GETOPT_LONG (argc, argv, "o:vx:", opts, &k)) != -1)
     switch (c) {
     case 'o':
       outfile = optarg;
@@ -75,6 +83,9 @@ int main (int argc, char *argv[]) {
   if (verbose)
     cout << data;
 
+  if (outfile.empty ())
+    return 0;
+
   try {
     timing::diagram diagram;
     diagram.push_back (DrawablePushGraphicContext ());
@@ -82,7 +93,8 @@ int main (int argc, char *argv[]) {
     diagram.render (data);
     diagram.push_back (DrawablePopGraphicContext ());
 
-    Image img (Geometry ((int)(scale*diagram.width), (int)(scale*diagram.height)), "white");
+    Image img (Geometry ((int)(scale*diagram.width),
+			 (int)(scale*diagram.height)), "white");
     img.draw (diagram);
     img.write (outfile);
   }

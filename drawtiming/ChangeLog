@@ -1,4 +1,8 @@
-2004-09-14    <ecounce@users.sourceforge.net>
+2004-09-15  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* Restructured for autoconf/automake.
+
+2004-09-14  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* Added rudimentary exception handling at toplevel
 

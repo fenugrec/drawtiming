@@ -18,65 +18,29 @@ An ideal timing diagram does not convey propigation delays between
 signal transitions.
 
 I use this software to document the design of hardware and software
-projects.  Although unconventional, I find the resulting timing
-diagrams to be a good complement to call plots for some software
-projects -- especially those with complex relationships between
-various signals and state variables.  Prior to writing this software,
-I created timing diagrams using schematic CAD software, but making
-changes to the signal behavior after the diagram was drawn was too
-much trouble.  (Things may have improved since my days of hardware
-design)
+projects.  I find the resulting timing diagrams to be a good
+complement to call plots for some software projects -- especially
+those with complex relationships between various signals and state
+variables.  Prior to writing this software, I created timing diagrams
+using schematic CAD software, but making changes to the signal
+behavior after the diagram was drawn was too much trouble.
 
 The software is licensed under the terms of the GPL.  See the LICENSE
 file for details of the terms under which you may modify or
 redistribute this software.
 
-------------------------------------------------------------
-INSTALLING
+INSTALL
 
-Drawtiming has been built and tested on Linux (SuSE 9.1), FreeBSD
-(4.3) and Cygwin (1.5.10).
+This package requires the Magick++ API from ImageMagick.
+See the INSTALL file for generic instructions.
 
-First, you need to install the development and runtime packages for
-ImageMagick (http://www.imagemagick.org).  Drawtiming uses the
-Magick++ API to render and output images.  Version 6.0.4 is known to
-work, but you should be able to use other versions too.
-
-You also need some compiler tools.  Without modifying the Makefile,
-you will need:
-
-bison (http://www.gnu.org/software/bison/bison.html),
-flex (http://www.gnu.org/software/flex/), 
-GNU make (http://www.gnu.org/software/make/), 
-GNU g++ compiler (http://gcc.gnu.org/).  
-
-Now you are ready to just type "make" from the toplevel drawtiming
-directory.  You can ignore these warnings if you see them:
-
-lex.yy.c:1574: warning: `void* yy_flex_realloc(void*, unsigned int)'
-  defined but not used
-lex.yy.c:1053: warning: `void yyunput(int, char*)' defined but not used
-g++: unrecognized option `-no-undefined'
-Info: resolving vtable for ... by linking to ... (auto-import)
-
-That's it.  You can now install the drawtiming (or drawtiming.exe)
-application anywhere in your path manually.
-
-------------------------------------------------------------
-TESTING 
-
-After building the package, run "make" in the "samples" directory.
-Timing diagrams will be generated for each of the samples, which you
-can compare against images found on the project homepage.   
-
-------------------------------------------------------------
 USAGE
 
-To use this tool for your own projects, you first need to write an
-input file describing the signals you want to plot.  I tried to make
-the input syntax intuitive, but it still needs some explanation.  I
-suggest that you take a look at the files in the samples directory
-after reading the brief syntax description that follows.
+To use this tool, you first need to write an input file describing the
+signals you want to plot.  I tried to make the input syntax intuitive,
+but it still needs some explanation.  I suggest that you take a look
+at the files in the samples directory after reading the brief syntax
+description that follows.
 
 Once the input file is complete, render it by executing the command:
 
@@ -101,7 +65,6 @@ Scales the canvas size on which to render.
 
 Increases the quantity of diagnostic output.
 
-------------------------------------------------------------
 FILE FORMAT
 
 The input file consists of a series of statements seperated by
@@ -114,16 +77,6 @@ timing diagram based on the current list of dependencies.
 
 In brief, commas seperate simultaneous signal changes, and periods
 indicate the end of a clock cycle.  
-
-Signal values are rendered according to the following rules:
-
-"0" "1" "true" and "false" are rendered as a binary hi/low signal.
-"tick" is rendered as a clock pulse which repeats.
-"pulse" is rendered as a one-shot clock pulse.
-"X" is rendered as a don't care value.
-"Z" is rendered as a tristate value.
-Anything else is rendered as a state.
-
 
 <signal> = <value>    
 
@@ -158,27 +111,14 @@ the clock.
 The "causes" seperator renders dependency arrows based on the current
 list of dependencies and then resets the dependency list.
 
-------------------------------------------------------------
-TODO
 
-This is my first attempt at open sourcing any of the many tools and
-libraries I have developed for my own use over almost 20 years of
-developing software, so it is something of an experiment in that
-regard.  I am not really looking to spend much more time working on a
-tool that already mostly meets my needs, so if you would like to see a
-new feature or if you find a bug, I would prefer that you take the
-time to submit a patch.  
+Signal values are rendered according to the following rules:
 
-I will solicit community support to add additional features to the
-existing functionality, to include enhanced annotation features,
-ability to express signals as functions, and potentially, a GUI.
-Bugfixes and ports to additional platforms are also appreciated.  
+"0" "1" "true" and "false" are rendered as a binary hi/low signal.
+"tick" is rendered as a clock pulse which repeats.
+"pulse" is rendered as a one-shot clock pulse.
+"X" is rendered as a don't care value.
+"Z" is rendered as a tristate value.
+Anything else is rendered as a state.
 
-I would also appreciate help with end-user documentation and from
-anyone who wants to enhance the Makefile
-
-------------------------------------------------------------
-AUTHORS
-
-Edward Counce (ecounce@users.sourceforge.net)
 
