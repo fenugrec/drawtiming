@@ -88,13 +88,10 @@ int main (int argc, char *argv[]) {
 
   try {
     timing::diagram diagram;
-    diagram.push_back (DrawablePushGraphicContext ());
-    diagram.push_back (DrawableScaling (scale, scale));
+    diagram.scale = scale;
     diagram.render (data);
-    diagram.push_back (DrawablePopGraphicContext ());
 
-    Image img (Geometry ((int)(scale*diagram.width),
-			 (int)(scale*diagram.height)), "white");
+    Image img (Geometry (diagram.width, diagram.height), "white");
     img.draw (diagram);
     img.write (outfile);
   }

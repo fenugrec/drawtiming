@@ -138,6 +138,13 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 
 // ------------------------------------------------------------
 
+diagram::diagram (void) {
+  scale = 1.0;
+  width = height = 0;
+}
+
+// ------------------------------------------------------------
+
 void diagram::render (const data &d) {
   int labelWidth = 0;
   Image img;
@@ -148,6 +155,9 @@ void diagram::render (const data &d) {
     if (m.textWidth () > labelWidth)
       labelWidth = (int) m.textWidth ();
   }
+
+  push_back (DrawablePushGraphicContext ());
+  push_back (DrawableScaling (scale, scale));
 
   map<signame,int> ypos;
   int y = 0;
@@ -171,8 +181,10 @@ void diagram::render (const data &d) {
 	       labelWidth + 16 + 64 * i->n_effect, 16 + ypos[i->effect]);
 
 
-  width = 16 + labelWidth + 64 * d.maxlen;
-  height = 32 * d.signals.size ();
+  push_back (DrawablePopGraphicContext ());
+
+  width = (int)(scale * (16 + labelWidth + 64 * d.maxlen));
+  height = (int)(scale * (32 * d.signals.size ()));
 }
 
 // ------------------------------------------------------------

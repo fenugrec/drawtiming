@@ -56,7 +56,9 @@ namespace timing {
   };
 
   struct diagram : public std::list<Magick::Drawable> {
+    double scale;
     int width, height;
+    diagram (void);
     void add_transition (int x, int y, const sigvalue &last, const sigvalue &value);
     void add_arrow (int x0, int y0, int x1, int y1);
     void render (const data &d);
