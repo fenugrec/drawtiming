@@ -1,0 +1,35 @@
+# here is a sample input file representing an optical channel turnup.
+
+# define the initial state of the signals.  anything not initialized
+# here is assumed to be a "don't care" up to the point it is first 
+# referenced.
+
+TUNED=0,
+LOF=1,
+ATC=IDLE,
+READY_NE=0,
+READY_FE=0,
+PRBS=IDLE,
+CERTIFIED=0,
+STATE=OOS.
+
+# TUNED is set after autotuning finishes
+TUNED=1.
+
+# LOF clear while TUNED triggers ATC start
+LOF=0, TUNED => ATC=RUNNING.
+
+# a period by itself indicates a time slice in which nothing changed.
+.
+
+# READY is set in the overhead when ATC finishes
+ATC=IDLE => READY_NE=1.
+
+# when READY is set at both ends, PRBS runs
+READY_FE=1, READY_NE => PRBS=RUNNING => STATE=TEST..
+
+# when PRBS finishes, the channel gets CERTIFIED and goes in-service
+PRBS=IDLE => STATE=OOS.
+PRBS => CERTIFIED=1 => STATE=IS.
+
+
