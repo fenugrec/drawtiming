@@ -23,7 +23,7 @@ extern int yylineno;
 int yylex (void);
 %}
 
-%token SYMBOL QSYMBOL CAUSE 
+%token SYMBOL QSYMBOL CAUSE DELAY
 
 %%
 
@@ -40,6 +40,8 @@ statement { deps.push_back ($1); }
 | statements ',' statement { deps.push_back ($3); }
 | statements ';' statement { deps.clear (); deps.push_back ($3); }
 | statements CAUSE statement { data.add_dependencies ($3, deps); 
+    deps.clear (); deps.push_back ($3); }
+| statements DELAY statement { data.add_delay ($3, deps.back (), $2); 
     deps.clear (); deps.push_back ($3); };
 
 statement:

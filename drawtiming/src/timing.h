@@ -47,9 +47,19 @@ namespace timing {
     unsigned n_effect;		// sequence number for effect signal
   };
 
+  struct delaydata {
+    std::string text;
+    signame trigger;		// name of trigger signal
+    signame effect;		// name of effect signal
+    unsigned n_trigger;		// sequence number of trigger signal
+    unsigned n_effect;		// sequence number for effect signal
+    int offset;			// prevent arrows from overlapping
+  };
+
   struct sigdata {
     signame name;		// name of signal
     sequence data;
+    int numdelays, maxdelays;
     sigdata (const signame &name);
     sigdata (const sigdata &);
     sigdata &operator= (const sigdata &);
@@ -59,11 +69,13 @@ namespace timing {
     unsigned maxlen;
     std::list<sigdata> signals;
     std::list<depdata> dependencies;
+    std::list<delaydata> delays;
     sigdata &find_signal (const signame &name);
     data (void);
     data (const data &);
     data &operator= (const data &);
     void add_dependencies (const signame &name, const siglist &deps);
+    void add_delay (const signame &name, const std::string &dep, const std::string &text);
     void set_value (const signame &name, unsigned n, const sigvalue &value);
     void pad (unsigned n);
   };
@@ -74,8 +86,9 @@ namespace timing {
     diagram (void);
     diagram (const diagram &);
     diagram &operator= (const diagram &);
-    void add_transition (int x, int y, const sigvalue &last, const sigvalue &value);
-    void add_arrow (int x0, int y0, int x1, int y1);
+    void draw_transition (int x, int y, const sigvalue &last, const sigvalue &value);
+    void draw_dependency (int x0, int y0, int x1, int y1);
+    void draw_delay (int x0, int y0, int x1, int y1, int y2, const std::string &text);
     void render (const data &d);
   };
 

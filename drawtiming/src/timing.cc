@@ -62,6 +62,8 @@ sigvalue &sigvalue::operator= (const sigvalue &t) {
 // ------------------------------------------------------------
 
 sigdata::sigdata (const signame &n) : name (n) {
+  numdelays = 0;
+  maxdelays = 0;
 }
 
 sigdata::sigdata (const sigdata &d) {
@@ -71,6 +73,8 @@ sigdata::sigdata (const sigdata &d) {
 // ------------------------------------------------------------
 
 sigdata &sigdata::operator= (const sigdata &d) {
+  numdelays = d.numdelays;
+  maxdelays = d.maxdelays;
   name = d.name;
   data = d.data;
 }
@@ -130,6 +134,27 @@ void data::add_dependencies (const signame &name, const siglist &deps) {
 
 // ------------------------------------------------------------
 
+void data::add_delay (const signame &name, const string &dep, const string &text) {
+  // find the signal
+  sigdata &sig = find_signal (name);
+  sigdata &trigger = find_signal (dep);
+  delaydata d;
+  d.text = text;
+  d.trigger = trigger.name;
+  d.effect = sig.name;
+  d.offset = trigger.numdelays;
+  if ((d.n_trigger = trigger.data.size ()) > 0)
+    -- d.n_trigger;
+  if ((d.n_effect = sig.data.size ()) > 0)
+    -- d.n_effect;
+  if (d.n_trigger != d.n_effect
+      && ++ trigger.numdelays > trigger.maxdelays)
+    trigger.maxdelays = trigger.numdelays;
+  delays.push_back (d);
+}
+
+// ------------------------------------------------------------
+
 void data::set_value (const signame &name, unsigned n, const sigvalue &value) {
   // find the signal
   sigdata &sig = find_signal (name);
@@ -144,6 +169,7 @@ void data::set_value (const signame &name, unsigned n, const sigvalue &value) {
 
   // append the value to the sequence data
   sig.data.push_back (value);
+  sig.numdelays = 0;
 
   if (n + 1 > maxlen)
     maxlen = n + 1;
@@ -252,29 +278,34 @@ void diagram::render (const data &d) {
     int x = labelWidth + 16;
     sigvalue last;
     for (sequence::const_iterator j = i->data.begin (); j != i->data.end (); ++ j) {
-      add_transition (x, y, last, *j);
+      draw_transition (x, y, last, *j);
       last = *j;
       x += 64;
     }
-    y += 32;
+    y += 32 + 12 * i->maxdelays;
   }
 
   for (list<depdata>::const_iterator i = d.dependencies.begin (); 
        i != d.dependencies.end (); ++ i)
-    add_arrow (labelWidth + 16 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
-	       labelWidth + 16 + 64 * i->n_effect, 16 + ypos[i->effect]);
+    draw_dependency (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
+		     labelWidth + 24 + 64 * i->n_effect, 16 + ypos[i->effect]);
 
+  for (list<delaydata>::const_iterator i = d.delays.begin (); 
+       i != d.delays.end (); ++ i)
+    draw_delay (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
+		labelWidth + 24 + 64 * i->n_effect, 16 + ypos[i->effect],
+		ypos[i->trigger] + 32 + 12 * i->offset + 8, i->text);
 
   push_back (DrawablePopGraphicContext ());
 
   width = (int)(scale * (16 + labelWidth + 64 * d.maxlen));
-  height = (int)(scale * (32 * d.signals.size ()));
+  height = (int)(scale * y);
 }
 
 // ------------------------------------------------------------
 
-void diagram::add_transition (int x, int y, const sigvalue &last,
-			      const sigvalue &value) {
+void diagram::draw_transition (int x, int y, const sigvalue &last,
+			       const sigvalue &value) {
 
   switch (value.type) {
   case ZERO:
@@ -436,53 +467,72 @@ void diagram::add_transition (int x, int y, const sigvalue &last,
 
 // ------------------------------------------------------------
 
-void diagram::add_arrow (int x0, int y0, int x1, int y1) {
+void diagram::draw_dependency (int x0, int y0, int x1, int y1) {
   list<Coordinate> shaft, head;
 
   push_back (DrawablePushGraphicContext ());
   push_back (DrawableStrokeColor ("blue"));
 
   if (x0 == x1) {
-    x0 += 8;
-    x1 += 8;
     if (y0 < y1) {
-      y1 -= 8;
-      push_back (DrawableLine (x0, y0, x1, y1));
+      push_back (DrawableLine (x0, y0, x1, y1 - 8));
       push_back (DrawableFillColor ("blue"));
-      head.push_back (Coordinate (x1, y1));
-      head.push_back (Coordinate (x1 - 3, y1 - 5));
-      head.push_back (Coordinate (x1, y1 - 3));
-      head.push_back (Coordinate (x1 + 3, y1 - 5));
+      head.push_back (Coordinate (x1, y1 - 8));
+      head.push_back (Coordinate (x1 - 3, y1 - 13));
+      head.push_back (Coordinate (x1, y1 - 11));
+      head.push_back (Coordinate (x1 + 3, y1 - 13));
       push_back (DrawablePolygon (head));
     }
     else {
-      y1 += 8;
-      push_back (DrawableLine (x0, y0, x1, y1));
+      push_back (DrawableLine (x0, y0, x1, y1 + 8));
       push_back (DrawableFillColor ("blue"));
-      head.push_back (Coordinate (x1, y1));
-      head.push_back (Coordinate (x1 - 3, y1 + 5));
-      head.push_back (Coordinate (x1, y1 + 3));
-      head.push_back (Coordinate (x1 + 3, y1 + 5));
+      head.push_back (Coordinate (x1, y1 + 8));
+      head.push_back (Coordinate (x1 - 3, y1 + 13));
+      head.push_back (Coordinate (x1, y1 + 11));
+      head.push_back (Coordinate (x1 + 3, y1 + 13));
       push_back (DrawablePolygon (head));
     }
   }
   else {
-    x0 += 8;
-    x1 += 4;
     push_back (DrawableFillColor ("none"));
     shaft.push_back (Coordinate (x0, y0));
-    shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
-    shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
-    shaft.push_back (Coordinate (x1, y1));
+    shaft.push_back (Coordinate ((x0 + x1 - 4) / 2, y1));
+    shaft.push_back (Coordinate ((x0 + x1 - 4) / 2, y1));
+    shaft.push_back (Coordinate (x1 - 4, y1));
     push_back (DrawableBezier (shaft));
     push_back (DrawableFillColor ("blue"));
-    head.push_back (Coordinate (x1, y1));
-    head.push_back (Coordinate (x1 - 5, y1 - 3));
-    head.push_back (Coordinate (x1 - 3, y1));
-    head.push_back (Coordinate (x1 - 5, y1 + 3));
+    head.push_back (Coordinate (x1 - 4, y1));
+    head.push_back (Coordinate (x1 - 9, y1 - 3));
+    head.push_back (Coordinate (x1 - 7, y1));
+    head.push_back (Coordinate (x1 - 9, y1 + 3));
     push_back (DrawablePolygon (head));
   }
 
+  push_back (DrawablePopGraphicContext ());
+}
+
+// ------------------------------------------------------------
+
+void diagram::draw_delay (int x0, int y0, int x1, int y1, int y2, const string &text) {
+  list<Coordinate> head;
+
+  push_back (DrawablePushGraphicContext ());
+  push_back (DrawableStrokeColor ("blue"));
+
+  if (x0 == x1) 
+    push_back (DrawableLine (x0, y0, x1, y1));
+  else {
+    push_back (DrawableText (x0 + 16, y2 - 2, text));
+    push_back (DrawableLine (x0, y0, x0, y2 + 4));
+    push_back (DrawableLine (x1, y1, x1, y2 - 4));
+    push_back (DrawableLine (x0, y2, x1, y2));
+    push_back (DrawableFillColor ("blue"));
+    head.push_back (Coordinate (x1, y2));
+    head.push_back (Coordinate (x1 - 5, y2 - 3));
+    head.push_back (Coordinate (x1 - 3, y2));
+    head.push_back (Coordinate (x1 - 5, y2 + 3));
+    push_back (DrawablePolygon (head));
+  }
   push_back (DrawablePopGraphicContext ());
 }
 

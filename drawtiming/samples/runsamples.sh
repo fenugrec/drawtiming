@@ -1,5 +1,5 @@
 #!/bin/sh -ex
-# this script is meant to be run by issuing "make check" 
+# this script is meant to be executed by running "make check" 
 
 ../src/drawtiming -o sample.gif $srcdir/sample.txt
 ../src/drawtiming -o turnup.gif $srcdir/turnup.txt
