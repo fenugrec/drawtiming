@@ -72,6 +72,7 @@ sigvalue::sigvalue (const std::string &s, valuetype n) {
 sigvalue &sigvalue::operator= (const sigvalue &t) {
   type = t.type;
   text = t.text;
+  return *this;
 }
 
 // ------------------------------------------------------------
@@ -91,6 +92,7 @@ sigdata &sigdata::operator= (const sigdata &d) {
   numdelays = d.numdelays;
   maxdelays = d.maxdelays;
   data = d.data;
+  return *this;
 }
 
 // ------------------------------------------------------------
@@ -109,6 +111,7 @@ data &data::operator= (const data &d) {
   signals = d.signals;
   sequence = d.sequence;
   dependencies = d.dependencies;
+  return *this;
 }
 
 // ------------------------------------------------------------
@@ -277,6 +280,7 @@ diagram &diagram::operator= (const diagram &d) {
   scale = d.scale;
   width = d.width;
   height = d.height;
+  return *this;
 }
 
 // ------------------------------------------------------------
