@@ -40,7 +40,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README
-%doc doc/drawtiming.html
 %doc /usr/local/man/man1/drawtiming.1.gz
 /usr/local/bin/drawtiming
 
