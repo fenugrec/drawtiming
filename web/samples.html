@@ -218,14 +218,15 @@ increment yields: </p>
       <pre style="margin-left: 40px;">FIRE, ARMED =&gt; LED=RED;<br>FIRE =&gt; COUNT="N+1".<br></pre>
       <br>
       <hr style="width: 100%; height: 2px;">
-      <h2><span style="font-weight: bold;"></span>OCH TURNUP</h2>
-      <p>Here is a sample input file representing an optical channel
-turnup.&nbsp; <br>
+      <h2><span style="font-weight: bold;"></span>MEMORY TIMING<br>
+      </h2>
+      <p>Here is a sample memory timing diagram, showing the new
+"delay" annotation.&nbsp; <br>
       </p>
-      <pre style="background-color: rgb(204, 204, 204);"># Define the initial state of the signals.  <br>TUNED=0, LOF=1, ATC=IDLE, READY_NE=0, READY_FE=0, PRBS=IDLE, <br>CERTIFIED=0, STATE=OOS.<br><br># TUNED is set after autotuning finishes<br>TUNED=1.<br><br># LOF clear while TUNED triggers ATC<br>LOF=0, TUNED =&gt; ATC=RUNNING.<br><br># a period by itself indicates a time period in which nothing changed.<br>.<br><br># READY is set in the overhead when ATC finishes<br>ATC=IDLE =&gt; READY_NE=1.<br><br># when READY is set at both ends, PRBS runs<br>READY_FE=1, READY_NE =&gt; PRBS=RUNNING =&gt; STATE=TEST..<br><br># when PRBS finishes, the channel gets CERTIFIED and goes in-service<br>PRBS=IDLE =&gt; STATE=OOS.<br>PRBS =&gt; CERTIFIED=1 =&gt; STATE=IS.</pre>
+      <pre style="background-color: rgb(204, 204, 204);">CS1 = 1, OE = 1, ADDR = X, DATA = Z.<br><br>CS1 = 0, OE = 0, ADDR = "".<br>OE -tOE&gt; DATA = "";<br>CS1 -tCS1&gt; DATA;<br>ADDR -tACC&gt; DATA.<br><br>OE = 1, CS1 = 1, ADDR = X.<br>CS1 -tH&gt; DATA = Z;<br>OE -tH&gt; DATA;<br>ADDR -tH&gt; DATA.<br></pre>
       <p>Here is the corresponding timing diagram:</p>
-      <img alt="OCH turnup timing diagram" src="turnup.gif"
- style="width: 658px; height: 256px;">
+      <img alt="Memory timing diagram" src="memory.gif"
+ style="width: 371px; height: 164px;"><br>
       <hr style="width: 100%; height: 2px;">
       <h2>SIGNAL VALUES</h2>
       <p>Here is a sample showing all of the available signal values:<br>

@@ -175,37 +175,32 @@ You need some software to build drawtiming:<br>
         <li>the development and runtime packages for <a
  href="http://www.imagemagick.org/">ImageMagick</a>.&nbsp; Drawtiming
 uses the Magick++ API to render and output images.</li>
-        <li><br>
-        </li>
       </ul>
       <h2>EXTRACT SOURCES<br>
       </h2>
 Download the latest source package and extract it with <a
  href="http://www.gnu.org/software/tar/tar.html">GNU
-tar</a>.&nbsp; Assuming the latest release is 0.1:<br>
-      <pre style="margin-left: 40px;">tar -xzf drawtiming-0.1.tar.gz<br></pre>
+tar</a>.&nbsp; Assuming the latest release is 0.x:<br>
+      <pre style="margin-left: 40px;">tar -xzf drawtiming-0.x.tar.gz<br></pre>
       <h2>CONFIGURE</h2>
       <p>Change directories to the newly extracted source directory and
 run configure to customize the package to your build environment:<br>
       </p>
-      <pre style="margin-left: 40px;">cd drawtiming-0.1<br>./configure<br></pre>
+      <pre style="margin-left: 40px;">cd drawtiming-0.x<br>./configure<br></pre>
       <p>On FreeBSD, you may need to provide some environment variables
-when you run configure to get long command-line option support:<br>
+when you run configure to get long command-line options to work:<br>
       </p>
       <pre style="margin-left: 40px;">CPPFLAGS=-I/usr/local/include LDFLAGS=-L/usr/local/lib ./configure</pre>
       <p>These directions assume you are compiling a source package
 downloaded
 from SourceForge.&nbsp; If you are compiling from a CVS snapshot, you
-will need to generate the configure script with the GNU build system
+will need to generate the configure script with GNU autotools
 before running configure.<br>
       </p>
       <h2>BUILD</h2>
       <p>Once configured, the package needs to be compiled:<br>
       </p>
       <pre style="margin-left: 40px;">make<br></pre>
-      <p>On FreeBSD, you may need to use GNU make instead:<br>
-      </p>
-      <pre style="margin-left: 40px;">gmake<br></pre>
       <h2>INSTALL<br>
       </h2>
       <p>You will need superuser privileges to install the application
