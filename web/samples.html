@@ -142,7 +142,7 @@ to change simultaneously, the initial state is a good example of this:
 </p>
 
 <pre class="cmd">
-POWER=0, FIRE=0, ARMED=0, LED=OFF.
+POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.
 </pre>
 
 <p>Dependencies can also be indicated for a signal transition.
@@ -167,8 +167,7 @@ POWER=1 =&gt; LED=GREEN.
 the dependencies with commas: </p> 
 
 <pre class="cmd">
-FIRE, ARMED =&gt;
-LED=RED.
+FIRE, ARMED =&gt; LED=RED.
 </pre>
 
 

@@ -113,7 +113,14 @@ drawtiming --output <span style="font-style: italic;">outfile.gif</span>&nbsp; <
 <dl>
   <dt>-o <span style="font-style: italic;">filename</span> </dt>
   <dt>--output <span style="font-style: italic;">filename</span></dt>
-  <dd>Required to produce an output image.</dd>
+  <dd>Required to produce an output image.  The output format is
+  determined from the filename.  For more details on this, consult the
+  ImageMagick <a
+  href="http://www.imagemagick.org/www/formats.html">documentation</a>
+  and the ImageMagick(1) man page.  <i>ImageMagick does additional
+  processing on this parameter, so you should review possible security
+  implications if you are running drawtiming from a CGI script for
+  instance.</i></dd>
  
   <dt>-x <span style="font-style: italic;">float</span> </dt>
   <dt>&nbsp;--scale <span style="font-style: italic;">float</span></dt>
@@ -129,7 +136,10 @@ drawtiming --output <span style="font-style: italic;">outfile.gif</span>&nbsp; <
 <p>I tried to make the input syntax intuitive, but it still needs some
 explanation.&nbsp; I suggest that you take a look at the <a
 href="samples.html">samples</a> before reading the description that
-follows. </p>
+follows. Also, at this stage in the project, I can not guarantee that
+the input file sentax and semantics will be completely forward
+compatible with future versions.  In such a situation, I will provide
+a translation tool with the release, and note it in the release notes.</p>
 
 <p>The input file consists of a series of statements seperated by
 seperators.&nbsp; Statements are used to modify the value of a signal

@@ -106,21 +106,21 @@
 <p>You need some software to build drawtiming:</p>
 
 <ul>
-  <li>a C++ compiler such as GNU C++</li>
-  <li>a make utility such as GNU make.</li>
+  <li>a tape archiver such as <a href="http://www.gnu.org/software/tar/tar.html">GNU tar</a>.</li>
+  <li>a C++ compiler such as found in the <a href="http://gcc.gnu.org/">GNU Compiler Collection</a></li>
+  <li>a make utility such as <a href="http://www.gnu.org/software/make/">GNU make</a>.</li>
   <li>the development and runtime packages for <a
     href="http://www.imagemagick.org/">ImageMagick</a>.&nbsp;
     Drawtiming uses the Magick++ API to render and output images.</li>
   <li>ghostscript.&nbsp; <span style="font-style: italic;">This is an
-    unexpected dependency, which I am currently investigating.&nbsp;
+    unexpected runtime dependency, which I am currently investigating.&nbsp;
     It appears that ImageMagick requires fonts from ghostscript in at
     least some circumstances.</span></li>
 </ul>
 
 <h2>EXTRACT SOURCES</h2>
 
-<p>Download the latest source package and extract it with <a
-href="http://www.gnu.org/software/tar/tar.html">GNU tar</a>.&nbsp;
+<p>Download the latest source package and extract it with GNU tar.&nbsp;
 Assuming the latest release is 0.x:</p>
 
 <pre class="cmd">
@@ -160,7 +160,7 @@ make
 <h2>INSTALL</h2>
 
 <p>You will need superuser privileges to install the application and
-man page:</p>
+man page in the default location, under /usr/local:</p>
 
 <pre class="cmd">
 make install
@@ -169,7 +169,9 @@ make install
 <h2>TEST</h2>
 
 <p>You can test drawtiming by running "make check" and comparing the
-samples generated with images from this website. </p>
+samples generated with images from the samples page from this website.
+Comparing the md5 for images from different runtime environments does
+not work unfortunately, so a visual inspection is necessary.</p>
 
 <pre class="cmd">
 make check
