@@ -1,4 +1,8 @@
-infile.tab.c
-infile.tab.h
-lex.yy.c
-*.d
+aclocal.m4
+configure
+install-sh
+config.h.in
+mkinstalldirs
+missing
+stamp-h.in
+Makefile.in
