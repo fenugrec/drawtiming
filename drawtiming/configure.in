@@ -1,5 +1,5 @@
 AC_INIT(src/main.cc)
-AM_INIT_AUTOMAKE(drawtiming,0.2,ecounce@users.sourceforge.net)
+AM_INIT_AUTOMAKE(drawtiming,0.3,ecounce@users.sourceforge.net)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CXX
@@ -20,4 +20,4 @@ AC_SUBST(MAGICK_LDFLAGS)
 AC_SUBST(MAGICK_LIBS)
 
 AC_C_CONST
-AC_OUTPUT(Makefile src/Makefile doc/Makefile)
+AC_OUTPUT(Makefile src/Makefile doc/Makefile samples/Makefile)

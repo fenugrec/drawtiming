@@ -13,9 +13,9 @@ tested on Linux, FreeBSD and Cygwin.
 
 If you aren't sure what I mean by ideal timing diagrams, then take a
 look at the project homepage (http://drawtiming.sourceforge.net) or
-take a look in the "samples" directory after building this package.
-An ideal timing diagram does not convey propigation delays between
-signal transitions.
+take a look in the "samples" directory after running "make check" on
+this package.  An ideal timing diagram does not convey propigation
+delays between signal transitions.
 
 I use this software to document the design of hardware and software
 projects.  I find the resulting timing diagrams to be a good
@@ -31,94 +31,13 @@ redistribute this software.
 
 INSTALL
 
-This package requires the Magick++ API from ImageMagick.
-See the INSTALL file for generic instructions.
+This package requires the Magick++ API from ImageMagick.  See the
+INSTALL file for generic instructions.  Step-by-step instructions can
+be found online at http://drawtiming.sourceforge.net/install.html
 
 USAGE
 
-To use this tool, you first need to write an input file describing the
-signals you want to plot.  I tried to make the input syntax intuitive,
-but it still needs some explanation.  I suggest that you take a look
-at the files in the samples directory after reading the brief syntax
-description that follows.
-
-Once the input file is complete, render it by executing the command:
-
-drawtiming --output filename.gif  inputfile.txt
-
-Here it is assumed that the input file is named "inputfile.txt" and
-that you want to generate a GIF image with the name "filename.gif" at
-the default scale.  The output format is determined from the
-filename.  
-
-The following options are accepted:
-
--o --output <filename>
-
-Required to product an output image.
-
--x --scale <float>
-
-Scales the canvas size on which to render.
-
--v --verbose
-
-Increases the quantity of diagnostic output.
-
-FILE FORMAT
-
-The input file consists of a series of statements seperated by
-seperators.  Statements are used to modify the value of a signal and
-to add a signal to the list of dependencies for subsequent statements.
-A seperator ("." "," ";" or "=>") is required after every statement.
-The seperators may reset the list of dependencies and/or increment the
-clock.  The "=>" seperator is used to draw causality arrows on the
-timing diagram based on the current list of dependencies.
-
-In brief, commas seperate simultaneous signal changes, and periods
-indicate the end of a clock cycle.  
-
-<signal> = <value>    
-
-This statement changes the value of a signal at the beginning of the
-current clock, and adds it to the list of signal dependencies.  Both
-the signal and the value have the same format, which consists of
-alphanumeric words optionally combined with "." periods.
-
-<signal> 
-
-This statement adds a signal to the list of dependencies without
-changing its value.
-
-, 
-
-The comma seperator is used to seperate statements without affecting
-the dependency list or clock (ie: the next statement will add to the
-dependency list).
-
-; 
-
-The semicolon seperator resets the list of dependencies without
-incrementing the clock
-
-.
-
-The period seperator resets the list of dependencies and increments
-the clock.
-
-=>
-
-The "causes" seperator renders dependency arrows based on the current
-list of dependencies and then resets the dependency list.
-
-
-Signal values are rendered according to the following rules:
-
-"0" "1" "true" and "false" are rendered as a binary hi/low signal.
-"tick" is rendered as a clock pulse which repeats.
-"pulse" is rendered as a one-shot clock pulse.
-"X" is rendered as a don't care value.
-"Z" is rendered as a tristate value.
-Anything else is rendered as a state.
-
+Please see the file drawtiming.html in the doc directory.  That file
+describes the command usage and input file syntax.  It also includes
+an example.
 

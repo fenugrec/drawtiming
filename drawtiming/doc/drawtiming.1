@@ -70,9 +70,11 @@ are ignored.
 .Bl -tag -width "SIGNAL=VALUE"
 .It SIGNAL=VALUE
 This statement changes the value of a signal at the beginning of the
-current clock, and adds it to the list of signal dependencies.  Both
-the signal and the value have the same format, which consists of
-alphanumeric words optionally combined with "." periods.  
+current clock, and adds it to the list of signal dependencies.  The
+signal name may consist of one or more words consisting of
+alphanumerics and underscores joined with periods, 
+.Ql signal.name ,
+for example.  The signal value format is described further on.
 .It SIGNAL
 This statement adds a signal to the list of dependencies without
 changing its value.
@@ -98,7 +100,7 @@ current list of dependencies and then resets the dependency list.
 Signal values are rendered according to the following rules:
 .Bl -tag -width "0, 1, true, false"
 .It 0 , 1 , true , false
-A binary hi/low signal.
+A binary high/low signal.
 .It tick
 A clock pulse which repeats.
 .It pulse
@@ -107,24 +109,29 @@ A one-shot clock pulse.
 A don't care value.
 .It Z
 A tristate value.
-.It ABC
-Anything else is rendered as a state.
+.It Qq ABC
+Any other alphanumeric token, or text enclosed in quotes is rendered
+as a state.  For example, 
+.Ql Qq 1 ,
+is rendered as a state, whereas,
+.Ql 1 ,
+is rendered as a high signal.
 .El
 .Sh EXAMPLES
 Let's look at an example input file, and parse its meaning.
 .Pp
 .Bd -literal -offset indent
-POWER=0, FIRE=0, ARMED=0, LED=OFF.
+POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.
 POWER=1 => LED=GREEN.
 FIRE=1. 
 FIRE => ARMED=1.
 FIRE=0.
 FIRE=1.
 FIRE, ARMED => LED=RED;
-FIRE => ARMED=0.
+FIRE => COUNT="N+1".
 .Ed
 .Pp
-This input file descibes the changes in four signals over a period of
+This input file descibes the changes in five signals over a period of
 seven clock cycles.  The end of each clock cycle is indicated with a
 period.  For example, the following line indicates a single signal,
 named
@@ -144,7 +151,7 @@ Independent signal transitions which occur simultaneously are normally
 seperated by commas. Since signals aren't normally expected to change
 simultaneously, the initial state is a good example of this:
 .Pp
-.Dl POWER=0, FIRE=0, ARMED=0, LED=OFF.
+.Dl POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.
 .Pp 
 Dependencies can also be indicated for a signal transition.
 Dependencies are rendered as arrows on the timing diagram from the
@@ -172,11 +179,11 @@ change.  Use a semicolon to start a new list of dependencies.
 Modifying the previous line to indicate that
 .Ql FIRE
 also causes 
-.Ql ARMED
-to reset yields:
+.Ql COUNT
+to increment yields:
 .Pp
 .Dl FIRE, ARMED => LED=RED;
-.Dl FIRE => ARMED=0.
+.Dl FIRE => COUNT="N+1".
 .Pp
 You can find this example and others along with their generated timing
 diagrams on the homepage for

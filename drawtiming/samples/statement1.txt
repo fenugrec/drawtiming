@@ -1,0 +1,5 @@
+token = X, clock = "N", deps.length = "0".
+token = SYMBOL => deps.length = "1".
+token = "\"=\"".
+token = SYMBOL.
+token = "\".\"" => clock = "N+1" => deps.length = "0".
