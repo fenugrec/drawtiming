@@ -12,10 +12,10 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar; if not, write to the Free Software
+# along with drawtiming; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-CXXFLAGS = -Wall -g -MMD
+CXXFLAGS := -Wall -g -MMD $(shell Magick++-config --cppflags --cxxflags) 
 LDFLAGS := $(shell Magick++-config --ldflags --libs)
 
 all: drawtiming
