@@ -22,6 +22,7 @@
 #  include <config.h>
 #endif
 #include "timing.h"
+#define YYSTYPE std::string
 
 extern unsigned n;
 extern timing::data data;

@@ -18,13 +18,12 @@
 
 %{
 #include "globals.h"
-#define YYSTYPE std::string
 void yyerror (const char *s);
 extern int yylineno;
 int yylex (void);
 %}
 
-%token SYMBOL CAUSE 
+%token SYMBOL QSYMBOL CAUSE 
 
 %%
 
@@ -44,7 +43,8 @@ statement { deps.push_back ($1); }
     deps.clear (); deps.push_back ($3); };
 
 statement:
-SYMBOL '=' SYMBOL { $$ = $1; data.set_value ($1, n, $3); }
+SYMBOL '=' SYMBOL { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3)); }
+| SYMBOL '=' QSYMBOL { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3, timing::STATE)); }
 | SYMBOL { $$ = $1; };
 
 %%

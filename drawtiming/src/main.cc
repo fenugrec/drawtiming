@@ -18,10 +18,9 @@
 #include "globals.h"
 #ifdef HAVE_GETOPT_H
 #  include <getopt.h>
-#  define GETOPT_LONG getopt_long
 #else
 #  include <unistd.h>
-#  define GETOPT_LONG(C,V,S,O,I) getopt(C,V,S)
+#  define getopt_long(C,V,S,O,I) getopt(C,V,S)
 #endif
 using namespace std;
 using namespace Magick;
@@ -33,7 +32,7 @@ int yyparse (void);
 unsigned n;
 timing::data data;
 timing::siglist deps;
-double scale = 1.0;
+timing::diagram diagram;
 string outfile;
 int verbose = 0;
 
@@ -47,14 +46,15 @@ struct option opts[] = {
 #endif
 
 int main (int argc, char *argv[]) {
+
   int k, c;
-  while ((c = GETOPT_LONG (argc, argv, "o:vx:", opts, &k)) != -1)
+  while ((c = getopt_long (argc, argv, "o:vx:", opts, &k)) != -1)
     switch (c) {
     case 'o':
       outfile = optarg;
       break;
     case 'x':
-      scale = atof (optarg);
+      diagram.scale = atof (optarg);
       break;
     case 'v':
       ++ verbose;
@@ -87,8 +87,6 @@ int main (int argc, char *argv[]) {
     return 0;
 
   try {
-    timing::diagram diagram;
-    diagram.scale = scale;
     diagram.render (data);
 
     Image img (Geometry (diagram.width, diagram.height), "white");

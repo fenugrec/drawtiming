@@ -25,8 +25,18 @@
 
 namespace timing {
 
+  enum valuetype {UNDEF, ZERO, ONE, X, Z, PULSE, TICK, STATE};
+
+  struct sigvalue {
+    valuetype type;
+    std::string text;
+    sigvalue (void);
+    sigvalue (const sigvalue &);
+    sigvalue (const std::string &s, valuetype n = UNDEF);
+    sigvalue &operator= (const sigvalue &);
+  };
+
   typedef std::string signame;
-  typedef std::string sigvalue;
   typedef std::list<signame> siglist;
   typedef std::list<sigvalue> sequence;
 
@@ -41,6 +51,8 @@ namespace timing {
     signame name;		// name of signal
     sequence data;
     sigdata (const signame &name);
+    sigdata (const sigdata &);
+    sigdata &operator= (const sigdata &);
   };
 
   struct data {
@@ -48,8 +60,9 @@ namespace timing {
     std::list<sigdata> signals;
     std::list<depdata> dependencies;
     sigdata &find_signal (const signame &name);
-    
-    data (void) : maxlen (0) {}
+    data (void);
+    data (const data &);
+    data &operator= (const data &);
     void add_dependencies (const signame &name, const siglist &deps);
     void set_value (const signame &name, unsigned n, const sigvalue &value);
     void pad (unsigned n);
@@ -59,6 +72,8 @@ namespace timing {
     double scale;
     int width, height;
     diagram (void);
+    diagram (const diagram &);
+    diagram &operator= (const diagram &);
     void add_transition (int x, int y, const sigvalue &last, const sigvalue &value);
     void add_arrow (int x0, int y0, int x1, int y1);
     void render (const data &d);

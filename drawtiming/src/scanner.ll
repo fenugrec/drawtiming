@@ -17,22 +17,24 @@
 */
 
 %{
-#include <string>
-#define YYSTYPE std::string
+#include "globals.h"
 #include "parser.h"
 %}
 
 %option yylineno
 %option noyywrap
-%x COMMENT
+%x COMMENT QUOTE
 SYM [A-Za-z0-9_]+
 
 %%
 
 <COMMENT>\n     BEGIN(INITIAL); 
 <COMMENT>.*     ;
-
+<QUOTE>\"       BEGIN(INITIAL); return QSYMBOL;
+<QUOTE>\\\"     yylval += '"';
+<QUOTE>.        yylval += yytext[0];
 {SYM}(\.{SYM})* yylval = std::string (yytext, yyleng); return SYMBOL;
+\"              BEGIN(QUOTE); yylval.erase ();
 =>              return CAUSE;
 #               BEGIN(COMMENT);
 [\n\t ]+        ;

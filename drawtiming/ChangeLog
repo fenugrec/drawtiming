@@ -1,3 +1,11 @@
+2004-09-21  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* added support for quoted signal values
+
+	* reduced use of string comparisons while rendering
+
+	* added copy constructors and assignment operators to classes
+
 2004-09-20  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* Release 0.2

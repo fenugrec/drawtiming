@@ -23,7 +23,73 @@ using namespace Magick;
 
 // ------------------------------------------------------------
 
+sigvalue::sigvalue (void) {
+  type = UNDEF;
+}
+
+sigvalue::sigvalue (const sigvalue &t) {
+  *this = t;
+}
+
+sigvalue::sigvalue (const std::string &s, valuetype n) {
+  text = s;
+  type = n;
+  if (type == UNDEF) {
+    if (text == "0" || text == "false")
+      type = ZERO;
+    else if (text == "1" || text == "true")
+      type = ONE;
+    else if (text == "pulse")
+      type = PULSE;
+    else if (text == "tick")
+      type = TICK;
+    else if (text == "X")
+      type = X;
+    else if (text == "Z")
+      type = Z;
+    else
+      type = STATE;
+  }
+}
+
+// ------------------------------------------------------------
+
+sigvalue &sigvalue::operator= (const sigvalue &t) {
+  type = t.type;
+  text = t.text;
+}
+
+// ------------------------------------------------------------
+
 sigdata::sigdata (const signame &n) : name (n) {
+}
+
+sigdata::sigdata (const sigdata &d) {
+  *this = d;
+}
+
+// ------------------------------------------------------------
+
+sigdata &sigdata::operator= (const sigdata &d) {
+  name = d.name;
+  data = d.data;
+}
+
+// ------------------------------------------------------------
+
+data::data (void) : maxlen (0) {
+}
+
+data::data (const data &d) {
+  *this = d;
+}
+
+// ------------------------------------------------------------
+
+data &data::operator= (const data &d) {
+  maxlen = d.maxlen;
+  signals = d.signals;
+  dependencies = d.dependencies;
 }
 
 // ------------------------------------------------------------
@@ -69,9 +135,9 @@ void data::set_value (const signame &name, unsigned n, const sigvalue &value) {
   sigdata &sig = find_signal (name);
 
   // pad the sequence so there are n data values
-  sigvalue lastval = (sig.data.size () == 0 ? "X" : sig.data.back ());
-  if (lastval == "pulse")
-    lastval = "0";
+  sigvalue lastval = (sig.data.size () == 0 ? sigvalue ("X", X) : sig.data.back ());
+  if (lastval.type == PULSE)
+    lastval = sigvalue ("0", ZERO);
 
   while (sig.data.size () < n) 
     sig.data.push_back (lastval);
@@ -90,12 +156,18 @@ void data::pad (unsigned n) {
   if (n > maxlen)
     maxlen = n;
   for (list<sigdata>::iterator i = signals.begin (); i != signals.end (); ++ i) {
-    sigvalue lastval = (i->data.size () == 0 ? "X" : i->data.back ());
-    if (lastval == "pulse")
-      lastval = "0";
+    sigvalue lastval = (i->data.size () == 0 ? sigvalue ("X", X) : i->data.back ());
+    if (lastval.type == PULSE)
+      lastval = sigvalue ("0", ZERO);
     while (i->data.size () < maxlen)
       i->data.push_back (lastval);
   }
+}
+
+// ------------------------------------------------------------
+
+ostream &operator<< (ostream &f, const sigvalue &data) {
+  return f << data.text;
 }
 
 // ------------------------------------------------------------
@@ -141,6 +213,18 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 diagram::diagram (void) {
   scale = 1.0;
   width = height = 0;
+}
+
+diagram::diagram (const diagram &d) {
+  *this = d;
+}
+
+// ------------------------------------------------------------
+
+diagram &diagram::operator= (const diagram &d) {
+  scale = d.scale;
+  width = d.width;
+  height = d.height;
 }
 
 // ------------------------------------------------------------
@@ -191,124 +275,161 @@ void diagram::render (const data &d) {
 
 void diagram::add_transition (int x, int y, const sigvalue &last,
 			      const sigvalue &value) {
-  if (value == "0" || value == "false") {
-    if (last == "" || last == "0" || last == "false" || last == "X" || last == "tick" || last == "pulse") {
+
+  switch (value.type) {
+  case ZERO:
+    switch (last.type) {
+    default:
       push_back (DrawableLine (x, y + 28, x + 64, y + 28));
-    }
-    else if (last == "1" || last == "true") {
+      break;
+
+    case ONE:
       push_back (DrawableLine (x, y + 4, x + 16, y + 28));
       push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
-    }
-    else if (last == "Z") {
+      break;
+    
+    case Z:
       push_back (DrawableLine (x, y + 16, x + 16, y + 28));
       push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
-    }
-    else {
+      break;
+
+    case STATE:
       push_back (DrawableLine (x, y + 4, x + 16, y + 28));
       push_back (DrawableLine (x, y + 28, x + 64, y + 28));
     }
-  }
+    break;
 
-  else if (value == "1" || value == "true") {
-    if (last == "" || last == "1" || last == "true" || last == "X") {
+  case ONE:
+    switch (last.type) {
+    default:
       push_back (DrawableLine (x, y + 4, x + 64, y + 4));
-    }
-    else if (last == "0" || last == "false" || last == "tick" || last == "pulse") {
+      break;
+
+    case ZERO:
+    case TICK:
+    case PULSE:
       push_back (DrawableLine (x, y + 28, x + 16, y + 4));
       push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
-    }
-    else if (last == "Z") {
+      break;
+
+    case Z:
       push_back (DrawableLine (x, y + 16, x + 16, y + 4));
       push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
-    }
-    else {
+      break;
+
+    case STATE:
       push_back (DrawableLine (x, y + 28, x + 16, y + 4));
       push_back (DrawableLine (x, y + 4, x + 64, y + 4));
+      break;
     }
-  }
+    break;
 
-  else if (value == "tick" || value == "pulse") {
-    if (last == "1" || last == "true" || last == "X") {
-      push_back (DrawableLine (x, y + 4, x + 32, y + 4));
-      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
-      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
-    }
-    else if (last == "" || last == "0" || last == "false" || last == "tick" || last == "pulse") {
+  case TICK:
+  case PULSE:
+    switch (last.type) {
+    default:
       push_back (DrawableLine (x, y + 28, x + 16, y + 4));
       push_back (DrawableLine (x + 16, y + 4, x + 32, y + 4));
       push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
       push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
-    }
-    else if (last == "Z") {
+      break;
+
+    case ONE:
+    case X:
+      push_back (DrawableLine (x, y + 4, x + 32, y + 4));
+      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
+      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      break;
+
+    case Z:
       push_back (DrawableLine (x, y + 16, x + 16, y + 4));
       push_back (DrawableLine (x + 16, y + 4, x + 32, y + 4));
       push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
       push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
-    }
-    else {
+      break;
+
+    case STATE:
       push_back (DrawableLine (x, y + 28, x + 16, y + 4));
       push_back (DrawableLine (x, y + 4, x + 32, y + 4));
       push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
       push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      break;
     }
-  }
+    break;
   
-  else if (value == "X") {
+  case UNDEF:
+  case X:
     for (int i = 0; i < 4; ++ i) {
       push_back (DrawableLine (x+i*16, y + 28, x+(i+1)*16, y + 4));
       push_back (DrawableLine (x+i*16, y + 4, x+(i+1)*16, y + 28));
     }
-  }
+    break;
   
-  else if (value == "Z") {
-    if (last == "" || last == "X" || last == "Z") {
+  case Z:
+    switch (last.type) {
+    default:
       push_back (DrawableLine (x, y + 16, x + 64, y + 16));
-    }
-    else if (last == "0" || last == "false" || last == "tick" || last == "pulse") {
+      break;
+
+    case ZERO:
+    case TICK:
+    case PULSE:
       push_back (DrawableLine (x, y + 28, x + 16, y + 16));
       push_back (DrawableLine (x + 16, y + 16, x + 64, y + 16));
-    }
-    else if (last == "1" || last == "true") {
+      break;
+
+    case ONE:
       push_back (DrawableLine (x, y + 4, x + 16, y + 16));
       push_back (DrawableLine (x + 16, y + 16, x + 64, y + 16));
-    }
-    else {
+      break;
+
+    case STATE:
       push_back (DrawableLine (x, y + 4, x + 8, y + 16));
       push_back (DrawableLine (x, y + 28, x + 8, y + 16));
       push_back (DrawableLine (x + 8, y + 16, x + 64, y + 16));
+      break;
     }
-  }
+    break;
   
-  else {
-    if (last == "0" || last == "false" || last == "tick" || last == "pulse") {
+  case STATE:
+    switch (last.type) {
+    default:
+      if (value.text != last.text) {
+	push_back (DrawableLine (x, y + 4, x + 16, y + 28));
+	push_back (DrawableLine (x, y + 28, x + 16, y + 4));
+	push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
+	push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
+	push_back (DrawableText (x + 16, y + 24, value.text));
+      }
+      else {
+	push_back (DrawableLine (x, y + 4, x + 64, y + 4));
+	push_back (DrawableLine (x, y + 28, x + 64, y + 28));
+      }
+      break;
+
+    case ZERO:
+    case TICK:
+    case PULSE:
       push_back (DrawableLine (x, y + 28, x + 16, y + 4));
       push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
       push_back (DrawableLine (x, y + 28, x + 64, y + 28));
-      push_back (DrawableText (x + 16, y + 24, value));
-    }
-    else if (last == "1" || last == "true") {
+      push_back (DrawableText (x + 16, y + 24, value.text));
+      break;
+    
+    case ONE:
       push_back (DrawableLine (x, y + 4, x + 16, y + 28));
       push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
       push_back (DrawableLine (x, y + 4, x + 64, y + 4));
-      push_back (DrawableText (x + 16, y + 24, value));
-    }
-    else if (last == "Z") {
+      push_back (DrawableText (x + 16, y + 24, value.text));
+      break;
+    
+    case Z:
       push_back (DrawableLine (x, y + 16, x + 8, y + 28));
       push_back (DrawableLine (x, y + 16, x + 8, y + 4));
       push_back (DrawableLine (x + 8, y + 28, x + 64, y + 28));
       push_back (DrawableLine (x + 8, y + 4, x + 64, y + 4));
-      push_back (DrawableText (x + 8, y + 24, value));
-    }
-    else if (value != last) {
-      push_back (DrawableLine (x, y + 4, x + 16, y + 28));
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
-      push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
-      push_back (DrawableText (x + 16, y + 24, value));
-    }
-    else {
-      push_back (DrawableLine (x, y + 4, x + 64, y + 4));
-      push_back (DrawableLine (x, y + 28, x + 64, y + 28));
+      push_back (DrawableText (x + 8, y + 24, value.text));
+      break;
     }
   }
 }
