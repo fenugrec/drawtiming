@@ -1,3 +1,7 @@
+2004-09-24  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* added support for delay annotation
+
 2004-09-22  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* added "make check" target in the samples directory

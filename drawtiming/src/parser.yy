@@ -23,7 +23,7 @@ extern int yylineno;
 int yylex (void);
 %}
 
-%token SYMBOL QSYMBOL CAUSE DELAY
+%token SYMBOL STRING CAUSE DELAY
 
 %%
 
@@ -36,17 +36,16 @@ timeslice:
 | statements '.' { deps.clear (); ++ n; }
 
 statements:
-statement { deps.push_back ($1); }
-| statements ',' statement { deps.push_back ($3); }
-| statements ';' statement { deps.clear (); deps.push_back ($3); }
-| statements CAUSE statement { data.add_dependencies ($3, deps); 
+statement { $$ = $1; deps.push_back ($1); }
+| statements ',' statement { $$ = $3; deps.push_back ($3); }
+| statements ';' statement { $$ = $3; deps.clear (); deps.push_back ($3); }
+| statements CAUSE statement { $$ = $3; data.add_dependencies ($3, deps); 
     deps.clear (); deps.push_back ($3); }
-| statements DELAY statement { data.add_delay ($3, deps.back (), $2); 
-    deps.clear (); deps.push_back ($3); };
+| statements DELAY statement { $$ = $3; data.add_delay ($3, $1, $2); }
 
 statement:
 SYMBOL '=' SYMBOL { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3)); }
-| SYMBOL '=' QSYMBOL { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3, timing::STATE)); }
+| SYMBOL '=' STRING { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3, timing::STATE)); }
 | SYMBOL { $$ = $1; };
 
 %%

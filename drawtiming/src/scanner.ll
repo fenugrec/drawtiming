@@ -31,11 +31,14 @@ SYM [A-Za-z0-9_]+
 <COMMENT>\n     BEGIN(INITIAL); 
 <COMMENT>.*     ;
 
-<QUOTE>\"       BEGIN(INITIAL); return QSYMBOL;
-<QUOTE>\\\"     yylval += '"';
+<QUOTE>\"       BEGIN(INITIAL); return STRING;
+<QUOTE>\\.      yylval += yytext[1];
+<QUOTE>\n       return -1;
 <QUOTE>.        yylval += yytext[0];
 
-<DELAYTEXT>->   BEGIN(INITIAL); return DELAY;
+<DELAYTEXT>>    BEGIN(INITIAL); return DELAY;
+<DELAYTEXT>\\.  yylval += yytext[1];
+<DELAYTEXT>\n   return -1;
 <DELAYTEXT>.    yylval += yytext[0];
 
 {SYM}(\.{SYM})* yylval = std::string (yytext, yyleng); return SYMBOL;

@@ -74,8 +74,9 @@ namespace timing {
     data (void);
     data (const data &);
     data &operator= (const data &);
+    void add_dependency (const signame &name, const signame &dep);
     void add_dependencies (const signame &name, const siglist &deps);
-    void add_delay (const signame &name, const std::string &dep, const std::string &text);
+    void add_delay (const signame &name, const signame &dep, const std::string &text);
     void set_value (const signame &name, unsigned n, const sigvalue &value);
     void pad (unsigned n);
   };

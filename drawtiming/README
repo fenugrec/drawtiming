@@ -33,11 +33,12 @@ INSTALL
 
 This package requires the Magick++ API from ImageMagick.  See the
 INSTALL file for generic instructions.  Step-by-step instructions can
-be found online at http://drawtiming.sourceforge.net/install.html
+be found on the project homepage.
 
 USAGE
 
-Please see the file drawtiming.html in the doc directory.  That file
-describes the command usage and input file syntax.  It also includes
-an example.
+Please consult the man page after installing this package.  The man
+page describes the command usage and input file syntax.  It also
+includes an example.  The same information with more examples can also
+be obtained from the project homepage.
 

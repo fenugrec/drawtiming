@@ -115,26 +115,34 @@ sigdata &data::find_signal (const signame &name) {
 
 // ------------------------------------------------------------
 
-void data::add_dependencies (const signame &name, const siglist &deps) {
+void data::add_dependency (const signame &name, const signame &dep) {
   // find the signal
   sigdata &sig = find_signal (name);
-
-  for (siglist::const_iterator j = deps.begin (); j != deps.end (); ++ j) {
-    sigdata &trigger = find_signal (*j);
-    depdata d;
-    d.trigger = trigger.name;
-    d.effect = sig.name;
-    if ((d.n_trigger = trigger.data.size ()) > 0)
-      -- d.n_trigger;
-    if ((d.n_effect = sig.data.size ()) > 0)
-      -- d.n_effect;
-    dependencies.push_back (d);
-  }
+  sigdata &trigger = find_signal (dep);
+  depdata d;
+  d.trigger = trigger.name;
+  d.effect = sig.name;
+  if ((d.n_trigger = trigger.data.size ()) > 0)
+    -- d.n_trigger;
+  if ((d.n_effect = sig.data.size ()) > 0)
+    -- d.n_effect;
+  dependencies.push_back (d);
 }
 
 // ------------------------------------------------------------
 
-void data::add_delay (const signame &name, const string &dep, const string &text) {
+void data::add_dependencies (const signame &name, const siglist &deps) {
+  for (siglist::const_iterator j = deps.begin (); j != deps.end (); ++ j) 
+    add_dependency (name, *j);
+}
+
+// ------------------------------------------------------------
+
+void data::add_delay (const signame &name, const signame &dep, const string &text) {
+  // a delay always indicates a dependency
+  // (but would require a way to select which is rendered)
+  // add_dependency (name, dep);
+
   // find the signal
   sigdata &sig = find_signal (name);
   sigdata &trigger = find_signal (dep);

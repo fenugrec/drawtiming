@@ -1,0 +1,13 @@
+CS1 = 1, OE = 1, ADDR = X, DATA = Z.
+
+CS1 = 0, OE = 0, ADDR = "".
+OE -tOE> DATA = "";
+CS1 -tCS1> DATA;
+ADDR -tACC> DATA.
+
+OE = 1, CS1 = 1, ADDR = X.
+CS1 -tH> DATA = Z;
+OE -tH> DATA;
+ADDR -tH> DATA.
+
+
