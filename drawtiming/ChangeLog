@@ -1,3 +1,7 @@
+2005-03-01  edward  <ecounce@users.sourceforge.net>
+
+	* resolved compiler warnings in timing.cc
+
 2004-09-24  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* Release 0.3
