@@ -1,0 +1,4 @@
+infile.tab.c
+infile.tab.h
+lex.yy.c
+*.d
