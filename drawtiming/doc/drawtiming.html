@@ -83,10 +83,10 @@ The name and format of the output image is determined by
 
 <DD>
 The input files describe the signals to be diagrammed.  See the
-Sx FILES
+FILES
 
 and
-Sx EXAMPLES
+EXAMPLES
 
 sections for a description of their format.
 </DL>
@@ -98,7 +98,7 @@ sections for a description of their format.
 The following is a technical description of the input file syntax and
 semantics.  If you are reading this for the first time, you may want
 to skip ahead to the 
-Sx EXAMPLES
+EXAMPLES
 
 section.
 <P>
@@ -117,9 +117,13 @@ are ignored.
 <DT><B>SIGNAL=VALUE</B>
 <DD>
 This statement changes the value of a signal at the beginning of the
-current clock, and adds it to the list of signal dependencies.  Both
-the signal and the value have the same format, which consists of
-alphanumeric words optionally combined with &quot;.&quot; periods.  
+current clock, and adds it to the list of signal dependencies.  The
+signal name may consist of one or more words consisting of
+alphanumerics and underscores joined by periods, 
+`signal.name'
+
+,
+for example.  The signal value format is described further on.
 <DT><B>SIGNAL</B>
 <DD>
 This statement adds a signal to the list of dependencies without
@@ -161,7 +165,7 @@ Signal values are rendered according to the following rules:
 
 <DT><B>0 , 1 , true , false</B>
 <DD>
-A binary hi/low signal.
+A binary high/low signal.
 <DT><B>tick</B>
 <DD>
 A clock pulse which repeats.
@@ -174,9 +178,22 @@ A don't care value.
 <DT><B>Z</B>
 <DD>
 A tristate value.
-<DT><B>ABC</B>
+<DT>&quot;ABC&quot
+
+
 <DD>
-Anything else is rendered as a state.
+Any other alphanumeric token, or text enclosed in quotes is rendered
+as a state.  For example, 
+`&quot;1&quot;
+
+'
+
+,
+is rendered as a state, whereas,
+`1'
+
+,
+is rendered as a high signal.
 </DL>
 <P>
 
@@ -189,20 +206,20 @@ Let's look at an example input file, and parse its meaning.
 
 <BLOCKQUOTE>
 <PRE>
-POWER=0, FIRE=0, ARMED=0, LED=OFF.
+POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.
 POWER=1 =&gt; LED=GREEN.
 FIRE=1. 
 FIRE =&gt; ARMED=1.
 FIRE=0.
 FIRE=1.
 FIRE, ARMED =&gt; LED=RED;
-FIRE =&gt; ARMED=0.
+FIRE =&gt; COUNT=&quot;N+1&quot;.
 </PRE>
 </BLOCKQUOTE>
 
 <P>
 
-This input file descibes the changes in four signals over a period of
+This input file descibes the changes in five signals over a period of
 seven clock cycles.  The end of each clock cycle is indicated with a
 period.  For example, the following line indicates a single signal,
 named
@@ -219,7 +236,7 @@ The first clock period of the input file provides the initial value
 for all signals to be diagrammed.  The signals will appear on the
 timing diagram in the order they first appear in the input file.
 Signals are assumed to have the
-Qq don't care
+<i>don't care</i>
 
 value if their initial value is not given.  
 <P>
@@ -230,7 +247,7 @@ simultaneously, the initial state is a good example of this:
 <P>
 
 
-<BLOCKQUOTE><TT>POWER=0, FIRE=0, ARMED=0, LED=OFF.</TT></BLOCKQUOTE>
+<BLOCKQUOTE><TT>POWER=0, FIRE=0, ARMED=0, LED=OFF, COUNT=N.</TT></BLOCKQUOTE>
 <P>
 
 Dependencies can also be indicated for a signal transition.
@@ -271,15 +288,15 @@ Modifying the previous line to indicate that
 `FIRE'
 
 also causes 
-`ARMED'
+`COUNT'
 
-to reset yields:
+to increment yields:
 <P>
 
 
 <BLOCKQUOTE><TT>FIRE, ARMED =&gt; LED=RED;</TT></BLOCKQUOTE>
 
-<BLOCKQUOTE><TT>FIRE =&gt; ARMED=0.</TT></BLOCKQUOTE>
+<BLOCKQUOTE><TT>FIRE =&gt; COUNT=&quot;N+1&quot;.</TT></BLOCKQUOTE>
 <P>
 
 You can find this example and others along with their generated timing
@@ -332,6 +349,6 @@ None reported.
 This document was created by
 man2html,
 using the manual pages.<BR>
-Time:  GMT, September 20, 2004
+Time:  GMT, September 22, 2004
 </BODY>
 </HTML>
