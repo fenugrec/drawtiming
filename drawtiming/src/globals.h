@@ -26,6 +26,6 @@
 
 extern unsigned n;
 extern timing::data data;
-extern timing::siglist deps;
+extern timing::signal_sequence deps;
 
 #endif

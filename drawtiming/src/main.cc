@@ -31,7 +31,7 @@ int yyparse (void);
 
 unsigned n;
 timing::data data;
-timing::siglist deps;
+timing::signal_sequence deps;
 timing::diagram diagram;
 string outfile;
 int verbose = 0;
@@ -68,33 +68,37 @@ int main (int argc, char *argv[]) {
   if (verbose > 1)
     yydebug = 1;
 
-  for (int i = optind; i < argc; ++ i) {
-    yyin = fopen (argv[i], "rt");
-    if (yyin == NULL) 
-      perror (argv[i]);
-    else {
-      if (yyparse () != 0)
-	exit (2);
-      fclose (yyin);
-    }
-  }
-
-  data.pad (n);
-  if (verbose)
-    cout << data;
-
-  if (outfile.empty ())
-    return 0;
-
   try {
+    for (int i = optind; i < argc; ++ i) {
+      yyin = fopen (argv[i], "rt");
+      if (yyin == NULL) 
+	perror (argv[i]);
+      else {
+	if (yyparse () != 0)
+	  exit (2);
+	fclose (yyin);
+      }
+    }
+
+    data.pad (n);
+    if (verbose)
+      cout << data;
+
+    if (outfile.empty ())
+      return 0;
+
     diagram.render (data);
 
     Image img (Geometry (diagram.width, diagram.height), "white");
     img.draw (diagram);
     img.write (outfile);
   }
-  catch (Exception &err) {
-    cerr << "caught exception: " << err.what () << endl;
+  catch (Magick::Exception &err) {
+    cerr << "caught Magick++ exception: " << err.what () << endl;
+    return 2;
+  }
+  catch (timing::exception &err) {
+    cerr << "caught timing exception: " << err.what () << endl;
     return 2;
   }
 

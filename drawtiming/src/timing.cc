@@ -23,6 +23,21 @@ using namespace Magick;
 
 // ------------------------------------------------------------
 
+not_found::not_found (const signame &name) throw () {
+  text = "signal \"";
+  text += name;
+  text += "\" not found";
+}
+
+not_found::~not_found () throw () {
+}
+
+const char *not_found::what (void) const throw () {
+  return text.c_str ();
+}
+
+// ------------------------------------------------------------
+
 sigvalue::sigvalue (void) {
   type = UNDEF;
 }
@@ -61,7 +76,7 @@ sigvalue &sigvalue::operator= (const sigvalue &t) {
 
 // ------------------------------------------------------------
 
-sigdata::sigdata (const signame &n) : name (n) {
+sigdata::sigdata (void) {
   numdelays = 0;
   maxdelays = 0;
 }
@@ -75,7 +90,6 @@ sigdata::sigdata (const sigdata &d) {
 sigdata &sigdata::operator= (const sigdata &d) {
   numdelays = d.numdelays;
   maxdelays = d.maxdelays;
-  name = d.name;
   data = d.data;
 }
 
@@ -93,24 +107,28 @@ data::data (const data &d) {
 data &data::operator= (const data &d) {
   maxlen = d.maxlen;
   signals = d.signals;
+  sequence = d.sequence;
   dependencies = d.dependencies;
 }
 
 // ------------------------------------------------------------
 
 sigdata &data::find_signal (const signame &name) {
-  // search for a signal by name
-  list<sigdata>::iterator i;
-  for (i = signals.begin (); i != signals.end (); ++ i) {
-    if (i->name == name)
-      break;
+  signal_database::iterator i = signals.find (name);
+  if (i == signals.end ()) {
+    i = signals.insert (signal_database::value_type (name, sigdata ())).first;
+    sequence.push_back (name);
   }
+  return i->second;
+}
 
-  // if not found, create a new signal
-  if (i == signals.end ())
-    i = signals.insert (i, sigdata (name));
+// ------------------------------------------------------------
 
-  return *i;
+const sigdata &data::find_signal (const signame &name) const {
+  signal_database::const_iterator i = signals.find (name);
+  if (i == signals.end ()) 
+    throw not_found (name);
+  return i->second;
 }
 
 // ------------------------------------------------------------
@@ -120,8 +138,8 @@ void data::add_dependency (const signame &name, const signame &dep) {
   sigdata &sig = find_signal (name);
   sigdata &trigger = find_signal (dep);
   depdata d;
-  d.trigger = trigger.name;
-  d.effect = sig.name;
+  d.trigger = dep;
+  d.effect = name;
   if ((d.n_trigger = trigger.data.size ()) > 0)
     -- d.n_trigger;
   if ((d.n_effect = sig.data.size ()) > 0)
@@ -131,8 +149,8 @@ void data::add_dependency (const signame &name, const signame &dep) {
 
 // ------------------------------------------------------------
 
-void data::add_dependencies (const signame &name, const siglist &deps) {
-  for (siglist::const_iterator j = deps.begin (); j != deps.end (); ++ j) 
+void data::add_dependencies (const signame &name, const signal_sequence &deps) {
+  for (signal_sequence::const_iterator j = deps.begin (); j != deps.end (); ++ j) 
     add_dependency (name, *j);
 }
 
@@ -148,8 +166,8 @@ void data::add_delay (const signame &name, const signame &dep, const string &tex
   sigdata &trigger = find_signal (dep);
   delaydata d;
   d.text = text;
-  d.trigger = trigger.name;
-  d.effect = sig.name;
+  d.trigger = dep;
+  d.effect = name;
   d.offset = trigger.numdelays;
   if ((d.n_trigger = trigger.data.size ()) > 0)
     -- d.n_trigger;
@@ -189,12 +207,13 @@ void data::pad (unsigned n) {
   // pad all sequences to length n
   if (n > maxlen)
     maxlen = n;
-  for (list<sigdata>::iterator i = signals.begin (); i != signals.end (); ++ i) {
-    sigvalue lastval = (i->data.size () == 0 ? sigvalue ("X", X) : i->data.back ());
+  for (signal_database::iterator i = signals.begin (); i != signals.end (); ++ i) {
+    sigvalue lastval = (i->second.data.size () == 0 ? sigvalue ("X", X) : 
+			i->second.data.back ());
     if (lastval.type == PULSE)
       lastval = sigvalue ("0", ZERO);
-    while (i->data.size () < maxlen)
-      i->data.push_back (lastval);
+    while (i->second.data.size () < maxlen)
+      i->second.data.push_back (lastval);
   }
 }
 
@@ -208,9 +227,9 @@ ostream &operator<< (ostream &f, const sigvalue &data) {
 
 ostream &operator<< (ostream &f, const data &data) {
   f << "signals: " << endl;
-  for (list<sigdata>::const_iterator i = data.signals.begin ();
-       i != data.signals.end (); ++ i) 
-    f << "  " << *i << endl;
+  for (signal_sequence::const_iterator i = data.sequence.begin ();
+       i != data.sequence.end (); ++ i) 
+    f << "  " << *i << ": " << data.find_signal (*i) << endl;
 
   f << endl << "dependencies: " << endl;
   for (list<depdata>::const_iterator i = data.dependencies.begin ();
@@ -223,9 +242,8 @@ ostream &operator<< (ostream &f, const data &data) {
 // ------------------------------------------------------------
 
 ostream &operator<< (ostream &f, const sigdata &sig) {
-  f << sig.name << ": ";
   int n = 0;
-  for (sequence::const_iterator i = sig.data.begin ();
+  for (value_sequence::const_iterator i = sig.data.begin ();
        i != sig.data.end (); ++ i, ++ n) {
     if (n)
       f << ", ";
@@ -267,9 +285,9 @@ void diagram::render (const data &d) {
   int labelWidth = 0;
   Image img;
   TypeMetric m;
-  for (list<sigdata>::const_iterator i = d.signals.begin ();
-       i != d.signals.end (); ++ i) {
-    img.fontTypeMetrics (i->name, &m);
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    img.fontTypeMetrics (*i, &m);
     if (m.textWidth () > labelWidth)
       labelWidth = (int) m.textWidth ();
   }
@@ -279,18 +297,20 @@ void diagram::render (const data &d) {
 
   map<signame,int> ypos;
   int y = 0;
-  for (list<sigdata>::const_iterator i = d.signals.begin ();
-       i != d.signals.end (); ++ i) {
-    push_back (DrawableText (8, y + 24, i->name));
-    ypos[i->name] = y;
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    const sigdata &sig = d.find_signal (*i);
+    push_back (DrawableText (8, y + 24, *i));
+    ypos[*i] = y;
     int x = labelWidth + 16;
     sigvalue last;
-    for (sequence::const_iterator j = i->data.begin (); j != i->data.end (); ++ j) {
+    for (value_sequence::const_iterator j = sig.data.begin ();
+	 j != sig.data.end (); ++ j) {
       draw_transition (x, y, last, *j);
       last = *j;
       x += 64;
     }
-    y += 32 + 12 * i->maxdelays;
+    y += 32 + 12 * sig.maxdelays;
   }
 
   for (list<depdata>::const_iterator i = d.dependencies.begin (); 
@@ -521,7 +541,8 @@ void diagram::draw_dependency (int x0, int y0, int x1, int y1) {
 
 // ------------------------------------------------------------
 
-void diagram::draw_delay (int x0, int y0, int x1, int y1, int y2, const string &text) {
+void diagram::draw_delay (int x0, int y0, int x1, int y1, int y2, 
+			  const string &text) {
   list<Coordinate> head;
 
   push_back (DrawablePushGraphicContext ());

@@ -20,7 +20,9 @@
 #define __TIMING_H
 #include <string>
 #include <list>
+#include <map>
 #include <iostream>
+#include <exception>
 #include <Magick++.h>
 
 namespace timing {
@@ -37,8 +39,19 @@ namespace timing {
   };
 
   typedef std::string signame;
-  typedef std::list<signame> siglist;
-  typedef std::list<sigvalue> sequence;
+  typedef std::list<signame> signal_sequence;
+  typedef std::list<sigvalue> value_sequence;
+
+  class exception : public std::exception {
+  };
+
+  class not_found : public exception {
+    signame text;
+  public:
+    not_found (const signame &n) throw ();
+    ~not_found () throw ();
+    const char *what (void) const throw ();
+  };
 
   struct depdata {
     signame trigger;		// name of trigger signal
@@ -57,39 +70,43 @@ namespace timing {
   };
 
   struct sigdata {
-    signame name;		// name of signal
-    sequence data;
+    value_sequence data;
     int numdelays, maxdelays;
-    sigdata (const signame &name);
+    sigdata (void);
     sigdata (const sigdata &);
     sigdata &operator= (const sigdata &);
   };
 
+  typedef std::map<signame, sigdata> signal_database;
+
   struct data {
     unsigned maxlen;
-    std::list<sigdata> signals;
+    signal_database signals;
+    signal_sequence sequence;
     std::list<depdata> dependencies;
     std::list<delaydata> delays;
-    sigdata &find_signal (const signame &name);
     data (void);
     data (const data &);
     data &operator= (const data &);
+    sigdata &find_signal (const signame &name);
+    const sigdata &find_signal (const signame &name) const;
     void add_dependency (const signame &name, const signame &dep);
-    void add_dependencies (const signame &name, const siglist &deps);
+    void add_dependencies (const signame &name, const signal_sequence &deps);
     void add_delay (const signame &name, const signame &dep, const std::string &text);
     void set_value (const signame &name, unsigned n, const sigvalue &value);
     void pad (unsigned n);
   };
 
-  struct diagram : public std::list<Magick::Drawable> {
+  class diagram : public std::list<Magick::Drawable> {
+    void draw_transition (int x, int y, const sigvalue &last, const sigvalue &value);
+    void draw_dependency (int x0, int y0, int x1, int y1);
+    void draw_delay (int x0, int y0, int x1, int y1, int y2, const std::string &text);
+  public:
     double scale;
     int width, height;
     diagram (void);
     diagram (const diagram &);
     diagram &operator= (const diagram &);
-    void draw_transition (int x, int y, const sigvalue &last, const sigvalue &value);
-    void draw_dependency (int x0, int y0, int x1, int y1);
-    void draw_delay (int x0, int y0, int x1, int y1, int y2, const std::string &text);
     void render (const data &d);
   };
 
