@@ -1,0 +1,3 @@
+BOOL=0, TICK=tick, PULSE=0, X=X, Z=Z, STATE=A.
+BOOL=1, PULSE=pulse, STATE=B.
+.
