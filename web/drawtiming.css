@@ -1,8 +1,8 @@
 
-.logo { 
-	text-align: right 
-}
-
+BODY { color: black; background-color: rgb(213, 199, 163); }
+.logo { text-align: right }
+PRE.code { background-color: rgb(204, 204, 204); }
+PRE.cmd { margin-left: 40px; }
 
 /************************************************************/
 /* COMMON TABLE */
@@ -43,6 +43,6 @@ TABLE.tabs { text-align: center; vertical-align: middle; }
 /************************************************************/
 /* CONTENT */
 
-TABLE.content { background-color: white; width: 100%; }
+TABLE.content { width: 100%; }
 TABLE.content TR.top TD.left { background: url(w.gif) no-repeat; }
 TABLE.content TR.top TD.middle { background-image: none; }
