@@ -1,10 +1,14 @@
+2004-09-25      version 0.3 released
+	Adds support for quoted signal values.
+	Adds support for delay annotation.
+
 2004-09-20      version 0.2 released
-	Man page 
-	Website online http://drawtiming.sourceforge.net
+	Adds a man page 
+	Website online at http://drawtiming.sourceforge.net
 
 2004-09-15      version 0.1 released
         GNU Build system
-        Exception handling
+	Adds exception handling
 
 2004-09-10	version 0 released
 	Initial version released on SourceForge.
