@@ -25,7 +25,7 @@ variables.  Prior to writing this software, I created timing diagrams
 using schematic CAD software, but making changes to the signal
 behavior after the diagram was drawn was too much trouble.
 
-The software is licensed under the terms of the GPL.  See the LICENSE
+The software is licensed under the terms of the GPL.  See the COPYING
 file for details of the terms under which you may modify or
 redistribute this software.
 
