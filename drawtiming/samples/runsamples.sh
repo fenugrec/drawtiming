@@ -1,4 +1,4 @@
-#!sh -ex
+#!/bin/sh -ex
 # this script is meant to be run by issuing "make check" 
 
 ../src/drawtiming -o sample.gif $srcdir/sample.txt
