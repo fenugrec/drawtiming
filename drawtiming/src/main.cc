@@ -28,6 +28,7 @@ using namespace Magick;
 extern FILE *yyin;
 extern int yydebug;
 int yyparse (void);
+static void usage (void);
 
 unsigned n;
 timing::data data;
@@ -38,6 +39,7 @@ int verbose = 0;
 
 #ifdef HAVE_GETOPT_H
 struct option opts[] = {
+  {"help", no_argument, NULL, 'h'},
   {"output", required_argument, NULL, 'o'},
   {"scale", required_argument, NULL, 'x'},
   {"verbose", no_argument, NULL, 'v'},
@@ -48,8 +50,12 @@ struct option opts[] = {
 int main (int argc, char *argv[]) {
 
   int k, c;
-  while ((c = getopt_long (argc, argv, "o:vx:", opts, &k)) != -1)
+  while ((c = getopt_long (argc, argv, "ho:vx:", opts, &k)) != -1)
     switch (c) {
+    case 'h':
+      usage ();
+      exit (1);
+      break;
     case 'o':
       outfile = optarg;
       break;
@@ -61,8 +67,10 @@ int main (int argc, char *argv[]) {
       break;
     }
 
-  if (optind >= argc)
-    return 0;
+  if (optind >= argc) {
+    usage ();
+    exit (1);
+  }
 
   yydebug = 0;
   if (verbose > 1)
@@ -103,4 +111,31 @@ int main (int argc, char *argv[]) {
   }
 
   return 0;
+}
+
+
+void usage (void) {
+  cout << "To generate a timing diagram, write a signal description file named," << endl
+       << "for example infile.txt, and run the application as shown:" << endl
+       << endl
+       << "    drawtiming --output outfile.gif  infile.txt" << endl
+       << endl
+       << "The following options are accepted:" << endl
+       << endl
+       << "-h" << endl
+       << "--help" << endl
+       << "    Show this help text." << endl
+       << "-o filename" << endl
+       << "--output filename" << endl
+       << "    Required to produce an output image. The output format is determined" << endl
+       << "    from the filename. For more details on this, consult the ImageMagick" << endl
+       << "    documentation and the ImageMagick(1) man page" << endl
+       << "-x float" << endl
+       << "--scale float" << endl
+       << "    Scales the canvas size on which to render." << endl
+       << "-v" << endl
+       << "--verbose" << endl
+       << "    Increases the quantity of diagnostic output." << endl
+       << endl
+       << "Consult the drawtiming(1) man page for details." << endl;
 }
