@@ -1,6 +1,6 @@
 Summary: A command line tool for generating ideal timing diagrams.
 Name: drawtiming
-Version: 0.4
+Version: 0.5
 Release: 1
 Copyright: GPL
 Group: Productivity/Graphics/CAD
