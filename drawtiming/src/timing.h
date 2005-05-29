@@ -97,17 +97,26 @@ namespace timing {
     void pad (unsigned n);
   };
 
+  ////////////////////////////////////////////////////////////
+  // A diagram is a display-list of ImageMagick graphics primitives.
+  // This class implements the logic for translating signal descriptions
+  // (see "struct data") into graphics primitives through the "render" method.
+
   class diagram : public std::list<Magick::Drawable> {
     void draw_transition (int x, int y, const sigvalue &last, const sigvalue &value);
     void draw_dependency (int x0, int y0, int x1, int y1);
     void draw_delay (int x0, int y0, int x1, int y1, int y2, const std::string &text);
+    int label_width (const data &d) const;
+    void base_size (const data &d, int &width, int &height) const;
+    void render_common (const data &d, double hscale, double vscale);
+
   public:
-    double scale;
     int width, height;
     diagram (void);
     diagram (const diagram &);
     diagram &operator= (const diagram &);
-    void render (const data &d);
+    void render (const data &d, double scale);
+    void render (const data &d, int w, int h, bool fixAspect);
   };
 
 };

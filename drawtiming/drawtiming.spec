@@ -13,15 +13,15 @@ Vendor: Edward Counce
 URL: http://drawtiming.sourceforge.net
 Packager: Edward Counce <ecounce@users.sourceforge.net>
 
-%description
+%description 
 This project provides a command line tool for documenting hardware and
 software designs through timing diagrams.  It includes a parser for reading an
 intuitive ASCII signal description from an input file, and uses the
 ImageMagick Magick++ API for rasterizing and outputting an image of an ideal
 timing diagram.  Notation typical of timing diagrams found in Electrical
 Engineering, including the signal state transitions with arrows indicating
-causal relationships between signals is generated.  It is written in
-C++, and has been tested on Linux, FreeBSD and Cygwin.
+causal relationships between signals is generated.  It is written in C++, and
+has been tested recently on Linux, and less recently on FreeBSD and Cygwin.
 
 %prep
 %setup -q 
@@ -44,6 +44,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/bin/drawtiming
 
 %changelog
+* Sun May 29 2005 - ecounce@users.sourceforge.net
+- update package to 0.5
 * Fri Sep 24 2004 - ecounce@users.sourceforge.net
 - update package to 0.4
 * Wed Sep 22 2004 - ecounce@users.sourceforge.net

@@ -1,3 +1,9 @@
+2005-05-29  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* implemented the --pagesize and --aspect options
+
+	* Release 0.5
+
 2005-04-13  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* added usage information

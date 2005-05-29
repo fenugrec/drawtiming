@@ -266,7 +266,6 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 // ------------------------------------------------------------
 
 diagram::diagram (void) {
-  scale = 1.0;
   width = height = 0;
 }
 
@@ -277,7 +276,6 @@ diagram::diagram (const diagram &d) {
 // ------------------------------------------------------------
 
 diagram &diagram::operator= (const diagram &d) {
-  scale = d.scale;
   width = d.width;
   height = d.height;
   return *this;
@@ -285,20 +283,46 @@ diagram &diagram::operator= (const diagram &d) {
 
 // ------------------------------------------------------------
 
-void diagram::render (const data &d) {
-  int labelWidth = 0;
-  Image img;
-  TypeMetric m;
-  for (signal_sequence::const_iterator i = d.sequence.begin ();
-       i != d.sequence.end (); ++ i) {
-    img.fontTypeMetrics (*i, &m);
-    if (m.textWidth () > labelWidth)
-      labelWidth = (int) m.textWidth ();
+void diagram::render (const data &d, double scale) {
+  int base_width, base_height;
+  base_size (d, base_width, base_height);
+
+  width = (int)(scale * base_width);
+  height = (int)(scale * base_height);
+
+  render_common (d, scale, scale);
+}
+
+// ------------------------------------------------------------
+
+void diagram::render (const data &d, int w, int h, bool fixAspect) {
+  int base_width, base_height;
+  base_size (d, base_width, base_height);
+
+  width = w;
+  height = h;
+
+  double hscale = w / (double)base_width;
+  double vscale = h / (double)base_height;
+
+  if (fixAspect) {
+      // to maintain aspect ratio, and fit the image:
+      hscale = vscale = min (hscale, vscale);
   }
 
-  push_back (DrawablePushGraphicContext ());
-  push_back (DrawableScaling (scale, scale));
+  render_common (d, hscale, vscale);
+}
 
+// ------------------------------------------------------------
+
+void diagram::render_common (const data &d, double hscale, double vscale) {
+
+  int labelWidth = label_width (d);
+
+  push_back (DrawablePushGraphicContext ());
+  push_back (DrawableScaling (hscale, vscale));
+
+  // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;
   int y = 0;
   for (signal_sequence::const_iterator i = d.sequence.begin ();
@@ -317,11 +341,13 @@ void diagram::render (const data &d) {
     y += 32 + 12 * sig.maxdelays;
   }
 
+  // draw the smooth arrows indicating the triggers for signal changes
   for (list<depdata>::const_iterator i = d.dependencies.begin (); 
        i != d.dependencies.end (); ++ i)
     draw_dependency (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
 		     labelWidth + 24 + 64 * i->n_effect, 16 + ypos[i->effect]);
 
+  // draw the timing delay annotations
   for (list<delaydata>::const_iterator i = d.delays.begin (); 
        i != d.delays.end (); ++ i)
     draw_delay (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
@@ -329,9 +355,38 @@ void diagram::render (const data &d) {
 		ypos[i->trigger] + 32 + 12 * i->offset + 8, i->text);
 
   push_back (DrawablePopGraphicContext ());
+}
 
-  width = (int)(scale * (16 + labelWidth + 64 * d.maxlen));
-  height = (int)(scale * y);
+// ------------------------------------------------------------
+// calculate the required label width
+
+int diagram::label_width (const data &d) const {
+  int labelWidth = 0;
+  Image img;
+  TypeMetric m;
+
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    img.fontTypeMetrics (*i, &m);
+    if (m.textWidth () > labelWidth)
+      labelWidth = (int) m.textWidth ();
+  }
+  return labelWidth;
+}
+
+// ------------------------------------------------------------
+// calculate the basic height and width required before scaling
+
+void diagram::base_size (const data &d, int &w, int &h) const {
+
+  w = 16 + label_width (d) + 64 * d.maxlen;
+
+  h = 0;
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    const sigdata &sig = d.find_signal (*i);
+    h += 32 + 12 * sig.maxdelays;
+  }
 }
 
 // ------------------------------------------------------------

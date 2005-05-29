@@ -9,7 +9,7 @@ found in the Electrical Engineering discipline, including the signal
 state transitions with arrows indicating causal relationships between
 signals is generated.  I am not aware of any noncommercial application
 to perform a similiar function.  It is written in C++, and has been
-tested on Linux, FreeBSD and Cygwin.  
+recently tested on Linux, but should also work for FreeBSD and Cygwin.  
 
 I use this software to document the design of hardware and software
 projects.  I find the resulting timing diagrams to be a good

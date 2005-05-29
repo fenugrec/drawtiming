@@ -25,6 +25,10 @@
 using namespace std;
 using namespace Magick;
 
+#define FLAG_PAGESIZE 1
+#define FLAG_SCALE 2
+#define FLAG_ASPECT 4
+
 extern FILE *yyin;
 extern int yydebug;
 int yyparse (void);
@@ -39,19 +43,27 @@ int verbose = 0;
 
 #ifdef HAVE_GETOPT_H
 struct option opts[] = {
+  {"aspect", no_argument, NULL, 'a'},
   {"help", no_argument, NULL, 'h'},
   {"output", required_argument, NULL, 'o'},
   {"scale", required_argument, NULL, 'x'},
+  {"pagesize", required_argument, NULL, 'p'},
   {"verbose", no_argument, NULL, 'v'},
   {0, 0, 0, 0}
 };
 #endif
 
 int main (int argc, char *argv[]) {
+  int width, height;
+  double scale = 1;
+  int flags = 0;
 
   int k, c;
-  while ((c = getopt_long (argc, argv, "ho:vx:", opts, &k)) != -1)
+  while ((c = getopt_long (argc, argv, "aho:p:vx:", opts, &k)) != -1)
     switch (c) {
+    case 'a':
+      flags |= FLAG_ASPECT;
+      break;    
     case 'h':
       usage ();
       exit (1);
@@ -59,8 +71,13 @@ int main (int argc, char *argv[]) {
     case 'o':
       outfile = optarg;
       break;
+    case 'p':
+      flags |= FLAG_PAGESIZE;
+      sscanf (optarg, "%dx%d", &width, &height);
+      break;
     case 'x':
-      diagram.scale = atof (optarg);
+      flags |= FLAG_SCALE;
+      scale = atof (optarg);
       break;
     case 'v':
       ++ verbose;
@@ -70,6 +87,21 @@ int main (int argc, char *argv[]) {
   if (optind >= argc) {
     usage ();
     exit (1);
+  }
+
+  if ((flags & FLAG_SCALE) && (flags & FLAG_PAGESIZE)) {
+    cerr << "The pagesize and scale options are mutually exclusive" << endl;
+    exit (2);
+  }
+
+  if ((flags & FLAG_SCALE) && scale <= 0) {
+    cerr << "Bad scale factor (" << scale << ") given" << endl;
+    exit (2);
+  }
+
+  if ((flags & FLAG_PAGESIZE) && (width <= 0 || height <= 0)) {
+    cerr << "Bad page size given (" << width << " x " << height << ")" << endl;
+    exit (2);
   }
 
   yydebug = 0;
@@ -95,8 +127,11 @@ int main (int argc, char *argv[]) {
     if (outfile.empty ())
       return 0;
 
-    diagram.render (data);
-
+    if (flags & FLAG_PAGESIZE)
+      diagram.render (data, width, height, (flags & FLAG_ASPECT));
+    else
+      diagram.render (data, scale);
+ 
     Image img (Geometry (diagram.width, diagram.height), "white");
     img.draw (diagram);
     img.write (outfile);
@@ -125,14 +160,20 @@ void usage (void) {
        << "-h" << endl
        << "--help" << endl
        << "    Show this help text." << endl
-       << "-o filename" << endl
-       << "--output filename" << endl
+       << "-o <filename>" << endl
+       << "--output <filename>" << endl
        << "    Required to produce an output image. The output format is determined" << endl
        << "    from the filename. For more details on this, consult the ImageMagick" << endl
        << "    documentation and the ImageMagick(1) man page" << endl
-       << "-x float" << endl
-       << "--scale float" << endl
+       << "-x <float>" << endl
+       << "--scale <float>" << endl
        << "    Scales the canvas size on which to render." << endl
+       << "-p <width>x<height>" << endl
+       << "--pagesize <width>x<height>" << endl
+       << "    Specify the canvas size to render on." << endl
+       << "-a" << endl
+       << "--aspect" << endl
+       << "    Maintain fixed aspect ratio if --pagesize given." << endl
        << "-v" << endl
        << "--verbose" << endl
        << "    Increases the quantity of diagnostic output." << endl

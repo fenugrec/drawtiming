@@ -25,6 +25,8 @@
 .Nm
 .Op Fl -verbose
 .Op Fl -scale Ar factor
+.Op Fl -pagesize Ar WxH
+.Op Fl -aspect
 .Fl -output Ar target
 .Ar
 .Sh DESCRIPTION
@@ -46,6 +48,10 @@ Increase diagnostic output.
 Scale the diagram by the given
 .Ar factor .
 The default scaling factor is 1.0.
+.It Fl -pagesize Ar WidthxHeight
+Scale the diagram to fit given image size.
+.It Fl -aspect
+Maintain fixed aspect ratio if --pagesize given.
 .It Fl -output Ar target
 The name and format of the output image is determined by
 .Ar target .
