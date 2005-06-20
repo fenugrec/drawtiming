@@ -1,5 +1,5 @@
 2005-05-29      version 0.5 released
-	Add --version and --aspect options.
+	Add --pagesize and --aspect options.
 
 2005-04-13      version 0.4 released
 	Adds usage reminder.
