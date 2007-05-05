@@ -1,4 +1,5 @@
 .\" Copyright (c)2004 by Edward Counce, All rights reserved
+.\" Copyright (c)2006-2007 by Salvador E. Tropea, All rights reserved
 .\" This file is part of drawtiming.
 .\"
 .\" Drawtiming is free software; you can redistribute it and/or modify
@@ -27,6 +28,10 @@
 .Op Fl -scale Ar factor
 .Op Fl -pagesize Ar WxH
 .Op Fl -aspect
+.Op Fl -cell-height Ar H
+.Op Fl -cell-width Ar W
+.Op Fl -font-size Ar pts
+.Op Fl -line-width Ar W
 .Fl -output Ar target
 .Ar
 .Sh DESCRIPTION
@@ -52,6 +57,14 @@ The default scaling factor is 1.0.
 Scale the diagram to fit given image size.
 .It Fl -aspect
 Maintain fixed aspect ratio if --pagesize given.
+.It Fl -cell-height Ar H
+Height of the each signal in pixels. Default is 32.
+.It Fl -cell-width Ar W
+Width for the time unit in pixels. Defaults is 64.
+.It Fl -font-size Ar pts
+Font size in pts. Default is 18.
+.It Fl -line-width Ar W
+Line width for drawings in pixels. Default is 1.
 .It Fl -output Ar target
 The name and format of the output image is determined by
 .Ar target .
@@ -212,5 +225,7 @@ command has been tested on FreeBSD, Linux, and Cygwin.
 .Sh AUTHORS
 This software package was written by
 .An Edward Counce Aq ecounce@users.sourceforge.net
+Additional modifications by
+.An Salvador E. Tropea Aq set@users.sourceforge.net
 .Sh BUGS
 None reported.

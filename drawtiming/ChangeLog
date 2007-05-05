@@ -1,3 +1,13 @@
+2007-05-05  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* 0.6.1: experimental self-referential delay support
+
+2007-03-09  Salvador E. Tropea  <set@users.sourceforge.net>
+
+	* Added: cell width and height, font size and line width configuration.
+
+	* Modified: version to 0.6.0.
+
 2005-05-29  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* implemented the --pagesize and --aspect options

@@ -1,4 +1,5 @@
 // Copyright (c)2004 by Edward Counce, All rights reserved. 
+// Copyright (c)2006-7 by Salvador E. Tropea, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -20,6 +21,15 @@
 using namespace std;
 using namespace timing;
 using namespace Magick;
+
+int timing::vFontPointsize = 12;
+int timing::vLineWidth = 1;
+int timing::vCellHt = 32;
+int timing::vCellW = 64;
+string timing::vFont = "Helvetica";
+
+static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
+            vCellWrm;
 
 // ------------------------------------------------------------
 
@@ -172,10 +182,16 @@ void data::add_delay (const signame &name, const signame &dep, const string &tex
   d.trigger = dep;
   d.effect = name;
   d.offset = trigger.numdelays;
+
   if ((d.n_trigger = trigger.data.size ()) > 0)
     -- d.n_trigger;
   if ((d.n_effect = sig.data.size ()) > 0)
     -- d.n_effect;
+
+  // allow self-referential signals
+  if (name == dep && d.n_trigger > 0)
+      -- d.n_trigger;
+
   if (d.n_trigger != d.n_effect
       && ++ trigger.numdelays > trigger.maxdelays)
     trigger.maxdelays = trigger.numdelays;
@@ -317,10 +333,14 @@ void diagram::render (const data &d, int w, int h, bool fixAspect) {
 
 void diagram::render_common (const data &d, double hscale, double vscale) {
 
-  int labelWidth = label_width (d);
-
   push_back (DrawablePushGraphicContext ());
   push_back (DrawableScaling (hscale, vscale));
+  push_back (DrawableFont (vFont, AnyStyle, 100, AnyStretch));
+  push_back (DrawablePointSize (vFontPointsize));
+  push_back (DrawableStrokeWidth(vLineWidth));
+  push_back (DrawableStrokeColor ("black"));
+
+  int labelWidth = label_width (d);
 
   // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;
@@ -328,33 +348,47 @@ void diagram::render_common (const data &d, double hscale, double vscale) {
   for (signal_sequence::const_iterator i = d.sequence.begin ();
        i != d.sequence.end (); ++ i) {
     const sigdata &sig = d.find_signal (*i);
-    push_back (DrawableText (8, y + 24, *i));
+    push_text (vCellWrm, y + vCellHtxt, *i);
     ypos[*i] = y;
-    int x = labelWidth + 16;
+    int x = labelWidth + vCellWtsep;
     sigvalue last;
     for (value_sequence::const_iterator j = sig.data.begin ();
 	 j != sig.data.end (); ++ j) {
       draw_transition (x, y, last, *j);
       last = *j;
-      x += 64;
+      x += vCellW;
     }
-    y += 32 + 12 * sig.maxdelays;
+    y += vCellHt + vCellHdel * sig.maxdelays;
   }
 
   // draw the smooth arrows indicating the triggers for signal changes
   for (list<depdata>::const_iterator i = d.dependencies.begin (); 
        i != d.dependencies.end (); ++ i)
-    draw_dependency (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
-		     labelWidth + 24 + 64 * i->n_effect, 16 + ypos[i->effect]);
+    draw_dependency (labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_trigger,
+                     vCellHt/2 + ypos[i->trigger],
+		     labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_effect,
+                     vCellHt/2 + ypos[i->effect]);
 
   // draw the timing delay annotations
   for (list<delaydata>::const_iterator i = d.delays.begin (); 
        i != d.delays.end (); ++ i)
-    draw_delay (labelWidth + 24 + 64 * i->n_trigger, 16 + ypos[i->trigger], 
-		labelWidth + 24 + 64 * i->n_effect, 16 + ypos[i->effect],
-		ypos[i->trigger] + 32 + 12 * i->offset + 8, i->text);
+    draw_delay (labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_trigger,
+                vCellHt/2 + ypos[i->trigger],
+		labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_effect,
+                vCellHt/2 + ypos[i->effect],
+		ypos[i->trigger] + vCellHt + vCellHdel * i->offset + vCellHtdel,
+                i->text);
 
   push_back (DrawablePopGraphicContext ());
+}
+
+// ------------------------------------------------------------
+// add text to the diagram
+
+void diagram::push_text (double xpos, double ypos, const string &text) {
+  push_back (DrawableStrokeWidth(1));
+  push_back (DrawableText (xpos, ypos, text));
+  push_back (DrawableStrokeWidth(vLineWidth));
 }
 
 // ------------------------------------------------------------
@@ -365,6 +399,8 @@ int diagram::label_width (const data &d) const {
   Image img;
   TypeMetric m;
 
+  img.font (vFont);
+  img.fontPointsize(vFontPointsize);
   for (signal_sequence::const_iterator i = d.sequence.begin ();
        i != d.sequence.end (); ++ i) {
     img.fontTypeMetrics (*i, &m);
@@ -379,13 +415,21 @@ int diagram::label_width (const data &d) const {
 
 void diagram::base_size (const data &d, int &w, int &h) const {
 
-  w = 16 + label_width (d) + 64 * d.maxlen;
+  vCellHsep = vCellHt / 8;
+  vCellH=vCellHt-vCellHsep;
+  vCellHtxt=vCellHt*3/4;
+  vCellHdel = vCellHt * 3/8;
+  vCellHtdel=vCellHt/4;
+  vCellWtsep=vCellW/4;
+  vCellWrm=vCellW/8;
+
+  w = vCellWrm*2 + label_width (d) + vCellW * d.maxlen;
 
   h = 0;
   for (signal_sequence::const_iterator i = d.sequence.begin ();
        i != d.sequence.end (); ++ i) {
     const sigdata &sig = d.find_signal (*i);
-    h += 32 + 12 * sig.maxdelays;
+    h += vCellHt + vCellHdel * sig.maxdelays;
   }
 }
 
@@ -398,46 +442,47 @@ void diagram::draw_transition (int x, int y, const sigvalue &last,
   case ZERO:
     switch (last.type) {
     default:
-      push_back (DrawableLine (x, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW, y + vCellH));
       break;
 
     case ONE:
-      push_back (DrawableLine (x, y + 4, x + 16, y + 28));
-      push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH));
       break;
     
     case Z:
-      push_back (DrawableLine (x, y + 16, x + 16, y + 28));
-      push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellHt/2, x + vCellW/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH));
       break;
 
     case STATE:
-      push_back (DrawableLine (x, y + 4, x + 16, y + 28));
-      push_back (DrawableLine (x, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/4, y + vCellH));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW, y + vCellH));
+      break;
     }
     break;
 
   case ONE:
     switch (last.type) {
     default:
-      push_back (DrawableLine (x, y + 4, x + 64, y + 4));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW, y + vCellHsep));
       break;
 
     case ZERO:
     case TICK:
     case PULSE:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW, y + vCellHsep));
       break;
 
     case Z:
-      push_back (DrawableLine (x, y + 16, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
+      push_back (DrawableLine (x, y + vCellHt/2, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW, y + vCellHsep));
       break;
 
     case STATE:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x, y + 4, x + 64, y + 4));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW, y + vCellHsep));
       break;
     }
     break;
@@ -446,31 +491,31 @@ void diagram::draw_transition (int x, int y, const sigvalue &last,
   case PULSE:
     switch (last.type) {
     default:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 32, y + 4));
-      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
-      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW/2, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/2, y + vCellHsep, x + vCellW*3/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW*3/4, y + vCellH, x + vCellW, y + vCellH));
       break;
 
     case ONE:
     case X:
-      push_back (DrawableLine (x, y + 4, x + 32, y + 4));
-      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
-      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/2, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/2, y + vCellHsep, x + vCellW*3/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW*3/4, y + vCellH, x + vCellW, y + vCellH));
       break;
 
     case Z:
-      push_back (DrawableLine (x, y + 16, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 32, y + 4));
-      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
-      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellHt/2, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW/2, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/2, y + vCellHsep, x + vCellW*3/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW*3/4, y + vCellH, x + vCellW, y + vCellH));
       break;
 
     case STATE:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x, y + 4, x + 32, y + 4));
-      push_back (DrawableLine (x + 32, y + 4, x + 48, y + 28));
-      push_back (DrawableLine (x + 48, y + 28, x + 64, y + 28));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/2, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/2, y + vCellHsep, x + vCellW*3/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW*3/4, y + vCellH, x + vCellW, y + vCellH));
       break;
     }
     break;
@@ -478,33 +523,35 @@ void diagram::draw_transition (int x, int y, const sigvalue &last,
   case UNDEF:
   case X:
     for (int i = 0; i < 4; ++ i) {
-      push_back (DrawableLine (x+i*16, y + 28, x+(i+1)*16, y + 4));
-      push_back (DrawableLine (x+i*16, y + 4, x+(i+1)*16, y + 28));
+      push_back (DrawableLine (x+i*(vCellW/4), y + vCellH,
+                               x+(i+1)*(vCellW/4), y + vCellHsep));
+      push_back (DrawableLine (x+i*(vCellW/4), y + vCellHsep,
+                               x+(i+1)*(vCellW/4), y + vCellH));
     }
     break;
   
   case Z:
     switch (last.type) {
     default:
-      push_back (DrawableLine (x, y + 16, x + 64, y + 16));
+      push_back (DrawableLine (x, y + vCellHt/2, x + vCellW, y + vCellHt/2));
       break;
 
     case ZERO:
     case TICK:
     case PULSE:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 16));
-      push_back (DrawableLine (x + 16, y + 16, x + 64, y + 16));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHt/2));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHt/2, x + vCellW, y + vCellHt/2));
       break;
 
     case ONE:
-      push_back (DrawableLine (x, y + 4, x + 16, y + 16));
-      push_back (DrawableLine (x + 16, y + 16, x + 64, y + 16));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/4, y + vCellHt/2));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHt/2, x + vCellW, y + vCellHt/2));
       break;
 
     case STATE:
-      push_back (DrawableLine (x, y + 4, x + 8, y + 16));
-      push_back (DrawableLine (x, y + 28, x + 8, y + 16));
-      push_back (DrawableLine (x + 8, y + 16, x + 64, y + 16));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/8, y + vCellHt/2));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/8, y + vCellHt/2));
+      push_back (DrawableLine (x + vCellW/8, y + vCellHt/2, x + vCellW, y + vCellHt/2));
       break;
     }
     break;
@@ -513,40 +560,40 @@ void diagram::draw_transition (int x, int y, const sigvalue &last,
     switch (last.type) {
     default:
       if (value.text != last.text) {
-	push_back (DrawableLine (x, y + 4, x + 16, y + 28));
-	push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-	push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
-	push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
-	push_back (DrawableText (x + 16, y + 24, value.text));
+	push_back (DrawableLine (x, y + vCellHsep, x + vCellW/4, y + vCellH));
+	push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+	push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW, y + vCellHsep));
+	push_back (DrawableLine (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH));
+	push_text (x + vCellW/4, y + vCellHtxt, value.text);
       }
       else {
-	push_back (DrawableLine (x, y + 4, x + 64, y + 4));
-	push_back (DrawableLine (x, y + 28, x + 64, y + 28));
+	push_back (DrawableLine (x, y + vCellHsep, x + vCellW, y + vCellHsep));
+	push_back (DrawableLine (x, y + vCellH, x + vCellW, y + vCellH));
       }
       break;
 
     case ZERO:
     case TICK:
     case PULSE:
-      push_back (DrawableLine (x, y + 28, x + 16, y + 4));
-      push_back (DrawableLine (x + 16, y + 4, x + 64, y + 4));
-      push_back (DrawableLine (x, y + 28, x + 64, y + 28));
-      push_back (DrawableText (x + 16, y + 24, value.text));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW/4, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/4, y + vCellHsep, x + vCellW, y + vCellHsep));
+      push_back (DrawableLine (x, y + vCellH, x + vCellW, y + vCellH));
+      push_text (x + vCellW/4, y + vCellHtxt, value.text);
       break;
     
     case ONE:
-      push_back (DrawableLine (x, y + 4, x + 16, y + 28));
-      push_back (DrawableLine (x + 16, y + 28, x + 64, y + 28));
-      push_back (DrawableLine (x, y + 4, x + 64, y + 4));
-      push_back (DrawableText (x + 16, y + 24, value.text));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW/4, y + vCellH));
+      push_back (DrawableLine (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH));
+      push_back (DrawableLine (x, y + vCellHsep, x + vCellW, y + vCellHsep));
+      push_text (x + vCellW/4, y + vCellHtxt, value.text);
       break;
     
     case Z:
-      push_back (DrawableLine (x, y + 16, x + 8, y + 28));
-      push_back (DrawableLine (x, y + 16, x + 8, y + 4));
-      push_back (DrawableLine (x + 8, y + 28, x + 64, y + 28));
-      push_back (DrawableLine (x + 8, y + 4, x + 64, y + 4));
-      push_back (DrawableText (x + 8, y + 24, value.text));
+      push_back (DrawableLine (x, y + vCellW/4, x + vCellW/8, y + vCellH));
+      push_back (DrawableLine (x, y + vCellW/4, x + vCellW/8, y + vCellHsep));
+      push_back (DrawableLine (x + vCellW/8, y + vCellH, x + vCellW, y + vCellH));
+      push_back (DrawableLine (x + vCellW/8, y + vCellHsep, x + vCellW, y + vCellHsep));
+      push_text (x + vCellW/8, y + vCellHtxt, value.text);
       break;
     }
   }
@@ -561,37 +608,43 @@ void diagram::draw_dependency (int x0, int y0, int x1, int y1) {
   push_back (DrawableStrokeColor ("blue"));
 
   if (x0 == x1) {
+    int w = vCellW/20, h = vCellHt/6, h2 = vCellHt/10;
+
     if (y0 < y1) {
-      push_back (DrawableLine (x0, y0, x1, y1 - 8));
+      y1 -= vCellHt/4;
+      push_back (DrawableLine (x0, y0, x1, y1));
       push_back (DrawableFillColor ("blue"));
-      head.push_back (Coordinate (x1, y1 - 8));
-      head.push_back (Coordinate (x1 - 3, y1 - 13));
-      head.push_back (Coordinate (x1, y1 - 11));
-      head.push_back (Coordinate (x1 + 3, y1 - 13));
+      head.push_back (Coordinate (x1, y1));
+      head.push_back (Coordinate (x1 - w, y1 - h));
+      head.push_back (Coordinate (x1, y1 - h2));
+      head.push_back (Coordinate (x1 + w, y1 - h));
       push_back (DrawablePolygon (head));
     }
     else {
-      push_back (DrawableLine (x0, y0, x1, y1 + 8));
+      y1 += vCellHt/4;
+      push_back (DrawableLine (x0, y0, x1, y1));
       push_back (DrawableFillColor ("blue"));
-      head.push_back (Coordinate (x1, y1 + 8));
-      head.push_back (Coordinate (x1 - 3, y1 + 13));
-      head.push_back (Coordinate (x1, y1 + 11));
-      head.push_back (Coordinate (x1 + 3, y1 + 13));
+      head.push_back (Coordinate (x1, y1));
+      head.push_back (Coordinate (x1 - w, y1 + h));
+      head.push_back (Coordinate (x1, y1 + h2));
+      head.push_back (Coordinate (x1 + w, y1 + h));
       push_back (DrawablePolygon (head));
     }
   }
   else {
+    int h = vCellHt/10, w1 = vCellW/12, w2 = vCellW/20;
+    x1 -= vCellW/16;
     push_back (DrawableFillColor ("none"));
     shaft.push_back (Coordinate (x0, y0));
-    shaft.push_back (Coordinate ((x0 + x1 - 4) / 2, y1));
-    shaft.push_back (Coordinate ((x0 + x1 - 4) / 2, y1));
-    shaft.push_back (Coordinate (x1 - 4, y1));
+    shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
+    shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
+    shaft.push_back (Coordinate (x1, y1));
     push_back (DrawableBezier (shaft));
     push_back (DrawableFillColor ("blue"));
-    head.push_back (Coordinate (x1 - 4, y1));
-    head.push_back (Coordinate (x1 - 9, y1 - 3));
-    head.push_back (Coordinate (x1 - 7, y1));
-    head.push_back (Coordinate (x1 - 9, y1 + 3));
+    head.push_back (Coordinate (x1, y1));
+    head.push_back (Coordinate (x1 - w1, y1 - h));
+    head.push_back (Coordinate (x1 - w2, y1));
+    head.push_back (Coordinate (x1 - w1, y1 + h));
     push_back (DrawablePolygon (head));
   }
 
@@ -610,15 +663,15 @@ void diagram::draw_delay (int x0, int y0, int x1, int y1, int y2,
   if (x0 == x1) 
     push_back (DrawableLine (x0, y0, x1, y1));
   else {
-    push_back (DrawableText (x0 + 16, y2 - 2, text));
-    push_back (DrawableLine (x0, y0, x0, y2 + 4));
-    push_back (DrawableLine (x1, y1, x1, y2 - 4));
+    push_back (DrawableText (x0 + vCellWtsep, y2 - vCellHt/16, text));
+    push_back (DrawableLine (x0, y0, x0, y2 + vCellHt/8));
+    push_back (DrawableLine (x1, y1, x1, y2 - vCellHt/8));
     push_back (DrawableLine (x0, y2, x1, y2));
     push_back (DrawableFillColor ("blue"));
     head.push_back (Coordinate (x1, y2));
-    head.push_back (Coordinate (x1 - 5, y2 - 3));
-    head.push_back (Coordinate (x1 - 3, y2));
-    head.push_back (Coordinate (x1 - 5, y2 + 3));
+    head.push_back (Coordinate (x1 - vCellW/12, y2 - vCellHt/10));
+    head.push_back (Coordinate (x1 - vCellW/20, y2));
+    head.push_back (Coordinate (x1 - vCellW/12, y2 + vCellHt/10));
     push_back (DrawablePolygon (head));
   }
   push_back (DrawablePopGraphicContext ());

@@ -1,0 +1,5 @@
+CLK25=tick.
+CLK25 -20ns> CLK25=tick.
+
+
+

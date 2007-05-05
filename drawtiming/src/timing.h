@@ -42,6 +42,9 @@ namespace timing {
   typedef std::list<signame> signal_sequence;
   typedef std::list<sigvalue> value_sequence;
 
+  extern int vFontPointsize, vLineWidth, vCellHt, vCellW;
+  extern std::string vFont;
+
   class exception : public std::exception {
   };
 
@@ -109,6 +112,7 @@ namespace timing {
     int label_width (const data &d) const;
     void base_size (const data &d, int &width, int &height) const;
     void render_common (const data &d, double hscale, double vscale);
+    void push_text (double xpos, double ypos, const std::string &text);
 
   public:
     int width, height;

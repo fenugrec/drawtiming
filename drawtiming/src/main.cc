@@ -1,4 +1,5 @@
-// Copyright (c)2004 by Edward Counce, All rights reserved.
+// Copyright (c)2004-2007 by Edward Counce, All rights reserved.
+// Copyright (c)2006-7 by Salvador E. Tropea, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -33,6 +34,8 @@ extern FILE *yyin;
 extern int yydebug;
 int yyparse (void);
 static void usage (void);
+static void banner (void);
+static void freesoft (void);
 
 unsigned n;
 timing::data data;
@@ -42,13 +45,35 @@ string outfile;
 int verbose = 0;
 
 #ifdef HAVE_GETOPT_H
+
+enum option_t {
+    OPT_ASPECT = 0x100,
+    OPT_CELL_HEIGHT,
+    OPT_CELL_WIDTH,
+    OPT_FONT,
+    OPT_FONT_SIZE,
+    OPT_HELP,
+    OPT_LINE_WIDTH,
+    OPT_OUTPUT,
+    OPT_SCALE,
+    OPT_PAGESIZE,
+    OPT_VERBOSE,
+    OPT_VERSION
+};
+
 struct option opts[] = {
-  {"aspect", no_argument, NULL, 'a'},
-  {"help", no_argument, NULL, 'h'},
-  {"output", required_argument, NULL, 'o'},
-  {"scale", required_argument, NULL, 'x'},
-  {"pagesize", required_argument, NULL, 'p'},
-  {"verbose", no_argument, NULL, 'v'},
+  {"aspect", no_argument, NULL, OPT_ASPECT},
+  {"cell-height", required_argument, NULL, OPT_CELL_HEIGHT},
+  {"cell-width", required_argument, NULL, OPT_CELL_WIDTH},
+  {"font", required_argument, NULL, OPT_FONT},
+  {"font-size", required_argument, NULL, OPT_FONT_SIZE},
+  {"help", no_argument, NULL, OPT_HELP},
+  {"line-width", required_argument, NULL, OPT_LINE_WIDTH},
+  {"output", required_argument, NULL, OPT_OUTPUT},
+  {"scale", required_argument, NULL, OPT_SCALE},
+  {"pagesize", required_argument, NULL, OPT_PAGESIZE},
+  {"verbose", no_argument, NULL, OPT_VERBOSE},
+  {"version", no_argument, NULL, OPT_VERSION},
   {0, 0, 0, 0}
 };
 #endif
@@ -59,29 +84,60 @@ int main (int argc, char *argv[]) {
   int flags = 0;
 
   int k, c;
-  while ((c = getopt_long (argc, argv, "aho:p:vx:", opts, &k)) != -1)
+  while ((c = getopt_long (argc, argv, "ac:f:hl:o:p:vVw:x:", opts, &k)) != -1)
     switch (c) {
     case 'a':
+    case OPT_ASPECT:
       flags |= FLAG_ASPECT;
       break;    
+    case 'c':
+    case OPT_CELL_HEIGHT:
+      timing::vCellHt = atoi (optarg);
+      break;
+    case OPT_FONT:
+      timing::vFont = optarg;
+      break;
+    case 'f':
+    case OPT_FONT_SIZE:
+      timing::vFontPointsize = atoi (optarg);
+      break;    
     case 'h':
+    case OPT_HELP:
       usage ();
       exit (1);
       break;
+    case 'l':
+    case OPT_LINE_WIDTH:
+      timing::vLineWidth = atoi (optarg);
+      break;    
     case 'o':
+    case OPT_OUTPUT:
       outfile = optarg;
       break;
     case 'p':
+    case OPT_PAGESIZE:
       flags |= FLAG_PAGESIZE;
       sscanf (optarg, "%dx%d", &width, &height);
       break;
     case 'x':
+    case OPT_SCALE:
       flags |= FLAG_SCALE;
       scale = atof (optarg);
       break;
     case 'v':
+    case OPT_VERBOSE:
       ++ verbose;
       break;
+    case 'V':
+    case OPT_VERSION:
+      banner ();
+      freesoft ();
+      exit (0);
+       break;
+    case 'w':
+    case OPT_CELL_WIDTH:
+      timing::vCellW = atoi (optarg);
+      break;    
     }
 
   if (optind >= argc) {
@@ -149,7 +205,19 @@ int main (int argc, char *argv[]) {
 }
 
 
+void freesoft (void) {
+  cout << "This is free software; see the source for copying conditions.  There is NO"  << endl
+       << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." << endl;
+}
+
+void banner (void) {
+  cout << "drawtiming " VERSION << endl
+       << "Copyright (c) 2004-2007 by Edward Counce" << endl
+       << "Copyright (c) 2006-2007 by Salvador E. Tropea" << endl << endl;
+}
+
 void usage (void) {
+  banner ();
   cout << "To generate a timing diagram, write a signal description file named," << endl
        << "for example infile.txt, and run the application as shown:" << endl
        << endl
@@ -177,6 +245,21 @@ void usage (void) {
        << "-v" << endl
        << "--verbose" << endl
        << "    Increases the quantity of diagnostic output." << endl
+       << "-c" << endl
+       << "--cell-height" << endl
+       << "    Height of the signal (pixels) [48]." << endl
+       << "-w" << endl
+       << "--cell-width" << endl
+       << "    Width of the time unit (pixels) [64]." << endl
+       << "--font <name>" << endl
+       << "    Font [Helvetica]" << endl
+       << "-f" << endl
+       << "--font-size" << endl
+       << "    Font size (pt) [25]." << endl
+       << "-l" << endl
+       << "--line-width" << endl
+       << "    Line width (pixels) [3]." << endl
        << endl
        << "Consult the drawtiming(1) man page for details." << endl;
 }
+
