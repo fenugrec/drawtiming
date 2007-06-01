@@ -1,3 +1,7 @@
+2007-05-31  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* 0.6.2: fix for delay arrow fill.  Release to sourceforge.
+
 2007-05-05  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* 0.6.1: experimental self-referential delay support
