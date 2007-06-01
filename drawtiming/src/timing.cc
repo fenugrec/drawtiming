@@ -635,6 +635,7 @@ void diagram::draw_dependency (int x0, int y0, int x1, int y1) {
     int h = vCellHt/10, w1 = vCellW/12, w2 = vCellW/20;
     x1 -= vCellW/16;
     push_back (DrawableFillColor ("none"));
+    push_back (DrawableFillOpacity (0));
     shaft.push_back (Coordinate (x0, y0));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
