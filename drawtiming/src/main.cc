@@ -1,5 +1,6 @@
 // Copyright (c)2004-2007 by Edward Counce, All rights reserved.
 // Copyright (c)2006-7 by Salvador E. Tropea, All rights reserved.
+// Copyright (c)2007 Thomas Sailer, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -16,6 +17,10 @@
 // along with drawtiming; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include "globals.h"
 #ifdef HAVE_GETOPT_H
 #  include <getopt.h>
@@ -29,6 +34,10 @@ using namespace Magick;
 #define FLAG_PAGESIZE 1
 #define FLAG_SCALE 2
 #define FLAG_ASPECT 4
+#define FLAG_SVG 8
+#define FLAG_PS 16
+#define FLAG_PDF 32
+#define FLAG_CAIROPNG 64
 
 extern FILE *yyin;
 extern int yydebug;
@@ -38,9 +47,12 @@ static void banner (void);
 static void freesoft (void);
 
 unsigned n;
-timing::data data;
+struct timing::data data;
 timing::signal_sequence deps;
 timing::diagram diagram;
+#if HAVE_CAIROMM
+timing::cairodiagram cairodiagram;
+#endif
 string outfile;
 int verbose = 0;
 
@@ -58,7 +70,11 @@ enum option_t {
     OPT_SCALE,
     OPT_PAGESIZE,
     OPT_VERBOSE,
-    OPT_VERSION
+    OPT_VERSION,
+    OPT_SVG,
+    OPT_PS,
+    OPT_PDF,
+    OPT_CAIROPNG
 };
 
 struct option opts[] = {
@@ -74,6 +90,10 @@ struct option opts[] = {
   {"pagesize", required_argument, NULL, OPT_PAGESIZE},
   {"verbose", no_argument, NULL, OPT_VERBOSE},
   {"version", no_argument, NULL, OPT_VERSION},
+  {"svg", no_argument, NULL, OPT_SVG},
+  {"ps", no_argument, NULL, OPT_PS},
+  {"pdf", no_argument, NULL, OPT_PDF},
+  {"cairopng", no_argument, NULL, OPT_CAIROPNG},
   {0, 0, 0, 0}
 };
 #endif
@@ -138,6 +158,18 @@ int main (int argc, char *argv[]) {
     case OPT_CELL_WIDTH:
       timing::vCellW = atoi (optarg);
       break;    
+    case OPT_SVG:
+      flags |= FLAG_SVG;
+      break;    
+    case OPT_PS:
+      flags |= FLAG_PS;
+      break;    
+    case OPT_PDF:
+      flags |= FLAG_PDF;
+      break;    
+    case OPT_CAIROPNG:
+      flags |= FLAG_CAIROPNG;
+      break;    
     }
 
   if (optind >= argc) {
@@ -183,14 +215,31 @@ int main (int argc, char *argv[]) {
     if (outfile.empty ())
       return 0;
 
-    if (flags & FLAG_PAGESIZE)
-      diagram.render (data, width, height, (flags & FLAG_ASPECT));
-    else
-      diagram.render (data, scale);
- 
-    Image img (Geometry (diagram.width, diagram.height), "white");
-    img.draw (diagram);
-    img.write (outfile);
+    if (flags & (FLAG_SVG | FLAG_PS | FLAG_PDF | FLAG_CAIROPNG)) {
+#if HAVE_CAIROMM
+      if (flags & FLAG_PAGESIZE)
+	cairodiagram.set_scale (data, width, height, (flags & FLAG_ASPECT));
+      else
+	cairodiagram.set_scale (data, scale);
+      if (flags & FLAG_SVG)
+	cairodiagram.render_to_svg (data, outfile);
+      else if (flags & FLAG_PS)
+	cairodiagram.render_to_ps (data, outfile);
+      else if (flags & FLAG_PDF)
+	cairodiagram.render_to_pdf (data, outfile);
+      else if (flags & FLAG_CAIROPNG)
+	cairodiagram.render_to_png (data, outfile);
+#endif
+    } else {
+      if (flags & FLAG_PAGESIZE)
+	diagram.render (data, width, height, (flags & FLAG_ASPECT));
+      else
+	diagram.render (data, scale);
+      
+      Image img (Geometry (diagram.width, diagram.height), "white");
+      img.draw (diagram);
+      img.write (outfile);
+    }
   }
   catch (Magick::Exception &err) {
     cerr << "caught Magick++ exception: " << err.what () << endl;
@@ -233,6 +282,13 @@ void usage (void) {
        << "    Required to produce an output image. The output format is determined" << endl
        << "    from the filename. For more details on this, consult the ImageMagick" << endl
        << "    documentation and the ImageMagick(1) man page" << endl
+#ifdef HAVE_CAIROMM
+       << "--svg" << endl
+       << "--ps" << endl
+       << "--pdf" << endl
+       << "--cairopng" << endl
+       << "    Use the cairo graphics library for rendering." << endl
+#endif
        << "-x <float>" << endl
        << "--scale <float>" << endl
        << "    Scales the canvas size on which to render." << endl

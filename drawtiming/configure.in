@@ -1,5 +1,5 @@
 AC_INIT(src/main.cc)
-AM_INIT_AUTOMAKE(drawtiming,0.6.2)
+AM_INIT_AUTOMAKE(drawtiming,0.6.2+cairomm)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CXX
@@ -8,6 +8,15 @@ AM_PROG_LEX
 AC_PROG_INSTALL
 AC_CHECK_LIB(gnugetopt, getopt_long)
 AC_CHECK_HEADERS(getopt.h)
+
+AC_ARG_WITH([cairomm],
+    [AS_HELP_STRING([--without-cairomm], [disable support for cairomm])],
+    [],
+    [with_cairomm=yes])
+          
+AS_IF([test "x$with_cairomm" != xno],
+    [PKG_CHECK_MODULES([CAIROMM], [cairomm-1.0 >= 1.2.0])
+     AC_DEFINE([HAVE_CAIROMM], [1], [Define for cairomm rendering])])
 
 # define Magick++ compile flags
 MAGICK_CPPFLAGS=$(Magick++-config --cppflags)

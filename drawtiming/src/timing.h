@@ -1,5 +1,6 @@
 // -*- mode: c++; -*-
 // Copyright (c)2004 by Edward Counce, All rights reserved.
+// Copyright (c)2007 Thomas Sailer, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -18,12 +19,20 @@
 
 #ifndef __TIMING_H
 #define __TIMING_H
+
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <string>
 #include <list>
 #include <map>
 #include <iostream>
 #include <exception>
 #include <Magick++.h>
+#if HAVE_CAIROMM
+#include <cairomm/cairomm.h>
+#endif
 
 namespace timing {
 
@@ -123,7 +132,42 @@ namespace timing {
     void render (const data &d, int w, int h, bool fixAspect);
   };
 
+#if HAVE_CAIROMM
+
+  class cairodiagram {
+    void draw_transition (double x, double y, const sigvalue &last, const sigvalue &value);
+    void draw_dependency (double x0, double y0, double x1, double y1);
+    void draw_delay (double x0, double y0, double x1, double y1, double y2, const std::string &text);
+    double label_width (const data &d) const;
+    void render_text (double xpos, double ypos, const std::string &text);
+    void render_line (double x1, double y1, double x2, double y2);
+    void render_poly (double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, bool fill);
+    void render_bezier (double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+    void stroke (void);
+    void render_common (const data &d);
+
+    Cairo::RefPtr<Cairo::Surface> m_surface;
+    Cairo::RefPtr<Cairo::Context> m_context;
+    double m_xmin, m_xmax, m_ymin, m_ymax;
+    double m_xscale, m_yscale;
+
+  public:
+    cairodiagram (void);
+    cairodiagram (const cairodiagram &);
+    cairodiagram &operator= (const cairodiagram &);
+    void set_scale (const data &d, double scale);
+    void set_scale (const data &d, int w, int h, bool fixAspect);
+    void render_to_svg (const data &d, const std::string& outfile);
+    void render_to_ps (const data &d, const std::string& outfile);
+    void render_to_pdf (const data &d, const std::string& outfile);
+    void render_to_png (const data &d, const std::string& outfile);
+	  
+  };
+
+#endif /* HAVE_CAIROMM */
+
 };
+
 
 std::ostream &operator<< (std::ostream &f, const timing::data &d);
 std::ostream &operator<< (std::ostream &f, const timing::sigdata &d);
