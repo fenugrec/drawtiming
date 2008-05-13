@@ -1,5 +1,6 @@
 // -*- mode: c++; -*-
 // Copyright (c)2004 by Edward Counce, All rights reserved.
+// Copyright (c)2008 by Daniel Beer, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -22,6 +23,7 @@
 #include <list>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <exception>
 #include <Magick++.h>
 
@@ -100,29 +102,80 @@ namespace timing {
     void pad (unsigned n);
   };
 
-  ////////////////////////////////////////////////////////////
-  // A diagram is a display-list of ImageMagick graphics primitives.
-  // This class implements the logic for translating signal descriptions
-  // (see "struct data") into graphics primitives through the "render" method.
-
-  class diagram : public std::list<Magick::Drawable> {
-    void draw_transition (int x, int y, const sigvalue &last, const sigvalue &value);
-    void draw_dependency (int x0, int y0, int x1, int y1);
-    void draw_delay (int x0, int y0, int x1, int y1, int y2, const std::string &text);
-    int label_width (const data &d) const;
-    void base_size (const data &d, int &width, int &height) const;
-    void render_common (const data &d, double hscale, double vscale);
-    void push_text (double xpos, double ypos, const std::string &text);
-
+  class gc {
   public:
     int width, height;
-    diagram (void);
-    diagram (const diagram &);
-    diagram &operator= (const diagram &);
-    void render (const data &d, double scale);
-    void render (const data &d, int w, int h, bool fixAspect);
+
+    gc (void) : width(0), height(0) { }
+    virtual ~gc() { }
+
+    virtual void bezier (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void fill_color (const std::string &name) = 0;
+    virtual void fill_opacity (int op) = 0;
+    virtual void font (const std::string &name) = 0;
+    virtual void line (int x1, int y1, int x2, int y2) = 0;
+    virtual void point_size (int size) = 0;
+    virtual void polygon (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void pop (void) = 0;
+    virtual void push (void) = 0;
+    virtual void scaling (double hscale, double vscale) = 0;
+    virtual void stroke_color (const std::string &name) = 0;
+    virtual void stroke_width (int w) = 0;
+    virtual void text (int x, int y, const std::string &text) = 0;
   };
 
+  class magick_gc : public gc {
+    std::list<Magick::Drawable> drawables;
+
+  public:
+    ~magick_gc (void);
+
+    void bezier (const std::list<Magick::Coordinate> &points);
+    void fill_color (const std::string &name);
+    void fill_opacity (int op);
+    void font (const std::string &name);
+    void line (int x1, int y1, int x2, int y2);
+    void point_size (int size);
+    void polygon (const std::list<Magick::Coordinate> &points);
+    void pop (void);
+    void push (void);
+    void scaling (double hscale, double vscale);
+    void stroke_color (const std::string &name);
+    void stroke_width (int w);
+    void text (int x, int y, const std::string &text);
+
+    void draw (Magick::Image& img) const;
+  };
+
+  class postscript_gc : public gc {
+    std::ostringstream ps_text;
+
+  public:
+    postscript_gc (void);
+    ~postscript_gc (void);
+
+    void bezier (const std::list<Magick::Coordinate> &points);
+    void fill_color (const std::string &name);
+    void fill_opacity (int op);
+    void font (const std::string &name);
+    void line (int x1, int y1, int x2, int y2);
+    void point_size (int size);
+    void polygon (const std::list<Magick::Coordinate> &points);
+    void pop (void);
+    void push (void);
+    void scaling (double hscale, double vscale);
+    void stroke_color (const std::string &name);
+    void stroke_width (int w);
+    void text (int x, int y, const std::string &text);
+
+    void print (std::ostream& out) const;
+    void print (const std::string& filename) const;
+
+    static bool has_ps_ext (const std::string& filename);
+  };
+
+  void render (gc &gc, const data &d, double scale);
+  void render (gc &gc, const data &d, int w, int h, bool fixAspect);
 };
 
 std::ostream &operator<< (std::ostream &f, const timing::data &d);
