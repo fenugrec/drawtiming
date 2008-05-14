@@ -716,14 +716,14 @@ void magick_gc::polygon (const std::list<Magick::Coordinate> &points)
 
 void magick_gc::pop (void)
 {
-  drawables.push_back (DrawablePushGraphicContext ());
+  drawables.push_back (DrawablePopGraphicContext ());
 }
 
 // ------------------------------------------------------------
 
 void magick_gc::push (void)
 {
-  drawables.push_back (DrawablePopGraphicContext ());
+  drawables.push_back (DrawablePushGraphicContext ());
 }
 
 // ------------------------------------------------------------
