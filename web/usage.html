@@ -120,7 +120,9 @@ drawtiming --output <span style="font-style: italic;">outfile.gif</span>&nbsp; <
   and the ImageMagick(1) man page.  <i>ImageMagick does additional
   processing on this parameter, so you should review possible security
   implications if you are running drawtiming from a CGI script for
-  instance.</i></dd>
+  instance.</i><br>
+  In addition to the formats supported by ImageMagick, postscript output
+  can be generated using extensions of ps or eps</dd>
  
   <dt>-x <span style="font-style: italic;">float</span> </dt>
   <dt>&nbsp;--scale <span style="font-style: italic;">float</span></dt>
@@ -137,6 +139,22 @@ drawtiming --output <span style="font-style: italic;">outfile.gif</span>&nbsp; <
   <dt>-v</dt>
   <dt>--verbose</dt>
   <dd>Increases the quantity of diagnostic output.</dd>
+
+  <dt>-c</dt>
+  <dt>--cell-height</dt>
+  <dd>Set the height of the signal in pixels.</dd>
+
+  <dt>-w</dt>
+  <dt>--cell-width</dt>
+  <dd>Set the width of the time period in pixels.</dd>
+
+  <dt>-f</dt>
+  <dt>--font-size</dt>
+  <dd>Set the font size in points.</dd>
+
+  <dt>-l</dt>
+  <dt>--line-width</dt>
+  <dd>Set the line width in pixels.</dd>
 </dl>
 
 <h2>INPUT FILE</h2>

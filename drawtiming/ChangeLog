@@ -1,3 +1,7 @@
+2008-05-11  Daniel Beer  <beeda742@student.otago.ac.nz>
+
+	* 0.7: added support for Postscript output.
+
 2007-05-31  Edward Counce  <ecounce@users.sourceforge.net>
 
 	* 0.6.2: fix for delay arrow fill.  Release to sourceforge.

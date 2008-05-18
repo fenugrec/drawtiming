@@ -1,5 +1,6 @@
 // Copyright (c)2004-2007 by Edward Counce, All rights reserved.
 // Copyright (c)2006-7 by Salvador E. Tropea, All rights reserved.
+// Copyright (c)2008 by Daniel Beer, All rights reserved.
 // This file is part of drawtiming.
 //
 // Drawtiming is free software; you can redistribute it and/or modify
@@ -40,7 +41,6 @@ static void freesoft (void);
 unsigned n;
 timing::data data;
 timing::signal_sequence deps;
-timing::diagram diagram;
 string outfile;
 int verbose = 0;
 
@@ -77,6 +77,15 @@ struct option opts[] = {
   {0, 0, 0, 0}
 };
 #endif
+
+static void render_it (timing::gc& gc, int flags,
+    		       int width, int height, double scale)
+{
+  if (flags & FLAG_PAGESIZE)
+    render (gc, data, width, height, (flags & FLAG_ASPECT));
+  else
+    render (gc, data, scale);
+}
 
 int main (int argc, char *argv[]) {
   int width, height;
@@ -183,14 +192,19 @@ int main (int argc, char *argv[]) {
     if (outfile.empty ())
       return 0;
 
-    if (flags & FLAG_PAGESIZE)
-      diagram.render (data, width, height, (flags & FLAG_ASPECT));
-    else
-      diagram.render (data, scale);
- 
-    Image img (Geometry (diagram.width, diagram.height), "white");
-    img.draw (diagram);
-    img.write (outfile);
+    if (timing::postscript_gc::has_ps_ext (outfile)) {
+      timing::postscript_gc gc;
+      render_it (gc, flags, width, height, 1.0);
+
+      gc.print (outfile);
+    } else {
+      timing::magick_gc gc;
+      render_it (gc, flags, width, height, scale);
+
+      Image img (Geometry (gc.width, gc.height), "white");
+      gc.draw (img);
+      img.write (outfile);
+    }
   }
   catch (Magick::Exception &err) {
     cerr << "caught Magick++ exception: " << err.what () << endl;
@@ -211,9 +225,10 @@ void freesoft (void) {
 }
 
 void banner (void) {
-  cout << "drawtiming " VERSION << endl
+  cout << "drawtiming " VERSION << " + postscript patches" << endl
        << "Copyright (c) 2004-2007 by Edward Counce" << endl
-       << "Copyright (c) 2006-2007 by Salvador E. Tropea" << endl << endl;
+       << "Copyright (c) 2006-2007 by Salvador E. Tropea" << endl
+       << "Copyright (c) 2008 by Daniel Beer" << endl;
 }
 
 void usage (void) {
@@ -233,9 +248,14 @@ void usage (void) {
        << "    Required to produce an output image. The output format is determined" << endl
        << "    from the filename. For more details on this, consult the ImageMagick" << endl
        << "    documentation and the ImageMagick(1) man page" << endl
+       << endl
+       << "    In addition to the formats supported by ImageMagick, Postscript " << endl
+       << "    output can be generated (this is enabled when the output filename's " << endl
+       << "    extension is either \"ps\" or \"eps\")." << endl
        << "-x <float>" << endl
        << "--scale <float>" << endl
-       << "    Scales the canvas size on which to render." << endl
+       << "    Scales the canvas size on which to render. This option has no effect" << endl
+       << "    in Postscript output." << endl
        << "-p <width>x<height>" << endl
        << "--pagesize <width>x<height>" << endl
        << "    Specify the canvas size to render on." << endl
