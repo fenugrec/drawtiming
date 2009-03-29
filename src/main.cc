@@ -25,7 +25,9 @@
 #  define getopt_long(C,V,S,O,I) getopt(C,V,S)
 #endif
 using namespace std;
+#ifndef LITE
 using namespace Magick;
+#endif /* ! LITE */
 
 #define FLAG_PAGESIZE 1
 #define FLAG_SCALE 2
@@ -198,18 +200,22 @@ int main (int argc, char *argv[]) {
 
       gc.print (outfile);
     } else {
+#ifndef LITE
       timing::magick_gc gc;
       render_it (gc, flags, width, height, scale);
 
       Image img (Geometry (gc.width, gc.height), "white");
       gc.draw (img);
       img.write (outfile);
+#endif /* ! LITE */
     }
   }
+#ifndef LITE
   catch (Magick::Exception &err) {
     cerr << "caught Magick++ exception: " << err.what () << endl;
     return 2;
   }
+#endif /* ! LITE */
   catch (timing::exception &err) {
     cerr << "caught timing exception: " << err.what () << endl;
     return 2;
