@@ -924,11 +924,11 @@ void postscript_gc::print (const std::string& filename) const {
   std::string ext = filename_ext (filename);
 
   if (!strcasecmp (ext.c_str (), "eps")) {
-    out << "%PS-Adobe-3.0 EPSF-3.0\n";
+    out << "%!PS-Adobe-3.0 EPSF-3.0\n";
     out << "%%BoundingBox: 0 0 " << width << ' ' << height << '\n';
     print (out);
   } else {
-    out << "%PS-Adobe-3.0\n";
+    out << "%!PS-Adobe-3.0\n";
     print (out);
     out << "showpage\n";
   }
