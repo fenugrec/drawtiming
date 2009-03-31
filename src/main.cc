@@ -46,8 +46,6 @@ timing::signal_sequence deps;
 string outfile;
 int verbose = 0;
 
-#ifdef HAVE_GETOPT_H
-
 enum option_t {
     OPT_ASPECT = 0x100,
     OPT_CELL_HEIGHT,
@@ -62,6 +60,8 @@ enum option_t {
     OPT_VERBOSE,
     OPT_VERSION
 };
+
+#ifdef HAVE_GETOPT_H
 
 struct option opts[] = {
   {"aspect", no_argument, NULL, OPT_ASPECT},
