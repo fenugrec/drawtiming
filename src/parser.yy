@@ -17,6 +17,9 @@
 */
 
 %{
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #include "globals.h"
 void yyerror (const char *s);
 extern int yylineno;

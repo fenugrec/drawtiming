@@ -1,3 +1,8 @@
+2009-04-02  Edward Counce  <ecounce@users.sourceforge.net>
+
+	* 0.7.1: configure option --without-magick to support building
+	         "Lite" version with mingw/msys.
+
 2008-05-11  Daniel Beer  <beeda742@student.otago.ac.nz>
 
 	* 0.7: added support for Postscript output.

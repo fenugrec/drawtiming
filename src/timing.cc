@@ -17,6 +17,9 @@
 // along with drawtiming; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #include "timing.h"
 #include <map>
 #include <fstream>
@@ -286,8 +289,10 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 
 static int label_width (const data &d) {
   int labelWidth = 0;
-  Image img;
+
+#ifndef LITE
   TypeMetric m;
+  Image img;
 
   img.font (vFont);
   img.fontPointsize(vFontPointsize);
@@ -297,6 +302,16 @@ static int label_width (const data &d) {
     if (m.textWidth () > labelWidth)
       labelWidth = (int) m.textWidth ();
   }
+#else
+  int m = 0;
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    if ((*i).size() > m)
+      m = (*i).size();
+  }
+  labelWidth = (int)(0.7 * m * vFontPointsize);
+#endif /* LITE */
+
   return labelWidth;
 }
 
@@ -666,6 +681,7 @@ void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect) {
 
 // ------------------------------------------------------------
 
+#ifndef LITE
 magick_gc::~magick_gc (void) {
 }
 
@@ -760,6 +776,8 @@ void magick_gc::draw (Magick::Image& img) const
 {
   img.draw (drawables);
 }
+
+#endif /* ! LITE */
 
 // ------------------------------------------------------------
 

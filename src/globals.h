@@ -18,9 +18,6 @@
 
 #ifndef __GLOBALS_H
 #define __GLOBALS_H
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
 #include "timing.h"
 #define YYSTYPE std::string
 

@@ -17,6 +17,9 @@
 // along with drawtiming; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #include "globals.h"
 #ifdef HAVE_GETOPT_H
 #  include <getopt.h>
@@ -25,7 +28,9 @@
 #  define getopt_long(C,V,S,O,I) getopt(C,V,S)
 #endif
 using namespace std;
+#ifndef LITE
 using namespace Magick;
+#endif /* ! LITE */
 
 #define FLAG_PAGESIZE 1
 #define FLAG_SCALE 2
@@ -44,8 +49,6 @@ timing::signal_sequence deps;
 string outfile;
 int verbose = 0;
 
-#ifdef HAVE_GETOPT_H
-
 enum option_t {
     OPT_ASPECT = 0x100,
     OPT_CELL_HEIGHT,
@@ -60,6 +63,8 @@ enum option_t {
     OPT_VERBOSE,
     OPT_VERSION
 };
+
+#ifdef HAVE_GETOPT_H
 
 struct option opts[] = {
   {"aspect", no_argument, NULL, OPT_ASPECT},
@@ -198,18 +203,22 @@ int main (int argc, char *argv[]) {
 
       gc.print (outfile);
     } else {
+#ifndef LITE
       timing::magick_gc gc;
       render_it (gc, flags, width, height, scale);
 
       Image img (Geometry (gc.width, gc.height), "white");
       gc.draw (img);
       img.write (outfile);
+#endif /* ! LITE */
     }
   }
+#ifndef LITE
   catch (Magick::Exception &err) {
     cerr << "caught Magick++ exception: " << err.what () << endl;
     return 2;
   }
+#endif /* ! LITE */
   catch (timing::exception &err) {
     cerr << "caught timing exception: " << err.what () << endl;
     return 2;
