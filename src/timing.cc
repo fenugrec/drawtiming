@@ -23,6 +23,7 @@
 #include "timing.h"
 #include <map>
 #include <fstream>
+#include <string.h>
 using namespace std;
 using namespace timing;
 using namespace Magick;
