@@ -23,7 +23,7 @@
 #include "timing.h"
 #include <map>
 #include <fstream>
-#include <string.h>
+#include <cctype>
 
 using namespace std;
 using namespace timing;
@@ -37,6 +37,15 @@ string timing::vFont = "Helvetica";
 static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
             vCellWrm;
 
+static std::string ToUpper(const std::string& str){
+  int i;
+  std::string ret = str;
+  for (i = 0; i < str.size(); ++i)
+    ret[i] = toupper(str[i]);
+
+  return ret;
+}
+
 static std::string filename_ext(const std::string &fname)
 {
   int i = fname.size () - 1;
@@ -49,8 +58,7 @@ static std::string filename_ext(const std::string &fname)
 
 bool timing::has_ext (const std::string &filename, const std::string& ext) {
 
-  std::string fext = filename_ext (filename);
-  return strcasecmp(fext.c_str (), ext.c_str()) == 0;
+  return (ToUpper(filename_ext(filename)) == ToUpper(ext));
 }
 
 // ------------------------------------------------------------

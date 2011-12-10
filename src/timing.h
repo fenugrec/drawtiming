@@ -23,7 +23,6 @@
 #include <list>
 #include <map>
 #include <iostream>
-#include <sstream>
 #include <exception>
 #include <gc.h>
 #include <cairo_gc.h>
