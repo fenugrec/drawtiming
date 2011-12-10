@@ -1,5 +1,5 @@
 AC_INIT(src/main.cc)
-AM_INIT_AUTOMAKE(drawtiming,0.7.1)
+AM_INIT_AUTOMAKE(drawtiming,0.8.0)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CXX
@@ -10,12 +10,12 @@ AC_C_CONST
 AC_CHECK_LIB(gnugetopt, getopt_long)
 AC_CHECK_HEADERS(getopt.h)
 
-AC_ARG_WITH([magick],
-  [AS_HELP_STRING([--without-magick], [Build lite version without ImageMagick])],
-  [], [with_magick=check])
+AC_ARG_WITH([cairo],
+  [AS_HELP_STRING([--without-cairo], [Build lite version without cairo])],
+  [], [with_cairo=check])
 
-AS_IF([test "x$with_magick" != "xno"],
-  [PKG_CHECK_MODULES([MAGICK], [ImageMagick++])],
-  [AC_DEFINE([LITE],[1],[Build without ImageMagick])])
+AS_IF([test "x$with_cairo" != "xno"],
+  [PKG_CHECK_MODULES([cairo], [cairo])],
+  [AC_DEFINE([LITE],[1],[Build without cairo])])
 
 AC_OUTPUT(Makefile drawtiming.spec src/Makefile doc/Makefile samples/Makefile)
