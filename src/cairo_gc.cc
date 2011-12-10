@@ -33,15 +33,7 @@ using namespace timing;
 cairo_gc::cairo_gc (const std::string& filename) :
   gc(filename),
   surface(NULL),
-  cr(NULL),
-  fill_color_r(0.0),
-  fill_color_g(0.0),
-  fill_color_b(0.0),
-  fill_color_a(1.0),
-  stroke_color_r(0.0),
-  stroke_color_g(0.0),
-  stroke_color_b(0.0),
-  stroke_color_a(1.0)
+  cr(NULL)
 {
 }
 
@@ -120,18 +112,6 @@ void cairo_gc::bezier (const std::list<Coordinate> &points) {
 
 // ------------------------------------------------------------
 
-void cairo_gc::fill_color (const std::string &name) {
-    decode_color(name, &fill_color_r, &fill_color_g, &fill_color_b);
-}
-
-// ------------------------------------------------------------
-
-void cairo_gc::fill_opacity (int op) {
-  fill_color_a = (op / 255.0);
-}
-
-// ------------------------------------------------------------
-
 void cairo_gc::font (const std::string& name) {
   cairo_select_font_face (cr, name.c_str(), CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 }
@@ -167,9 +147,7 @@ void cairo_gc::polygon (const std::list<Coordinate> &points)
   }
   cairo_close_path(cr);
 
-  cairo_set_source_rgba(cr, fill_color_r, fill_color_g, fill_color_b, fill_color_a);
   cairo_fill(cr);
-  cairo_set_source_rgba(cr, stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a);
 
   // Draw outline
   it = points.begin();
@@ -208,11 +186,11 @@ void cairo_gc::scaling (double hscale, double vscale)
 
 // ------------------------------------------------------------
 
-void cairo_gc::stroke_color (const std::string& name)
+void cairo_gc::color (const std::string& name)
 {
-  decode_color(name, &stroke_color_r, &stroke_color_g, &stroke_color_b);
-
-  cairo_set_source_rgba(cr, stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a);
+  double r, g, b;
+  decode_color(name, &r, &g, &b);
+  cairo_set_source_rgb(cr, r, g, b);
 }
 
 // ------------------------------------------------------------
@@ -261,7 +239,7 @@ void cairo_gc::set_surface_size(double w, double h){
   if (cairo_status(cr) != CAIRO_STATUS_SUCCESS)
     throw timing::exception();
 
-  stroke_color("white");
+  color("white");
   cairo_rectangle(cr, 0, 0, width, height);
   cairo_fill(cr);
 }

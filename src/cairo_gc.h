@@ -35,8 +35,6 @@ namespace timing {
     cairo_t *cr;
 
   private:
-    double fill_color_r, fill_color_g, fill_color_b, fill_color_a;
-    double stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a;
     int stroke_width;
     int font_size;
 
@@ -53,8 +51,6 @@ namespace timing {
     void set_surface_size(double w, double h);
     double get_label_width(const data &d);
     void bezier (const std::list<Coordinate> &points);
-    void fill_color (const std::string &name);
-    void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
@@ -62,7 +58,7 @@ namespace timing {
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
-    void stroke_color (const std::string &name);
+    void color (const std::string &name);
     void set_stroke_width (int w);
     void text (int x, int y, const std::string &text);
   };

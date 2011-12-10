@@ -95,17 +95,6 @@ void postscript_gc::bezier (const std::list<Coordinate> &points) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::fill_color (const std::string& name) {
-  stroke_color (name);
-}
-
-// ------------------------------------------------------------
-
-void postscript_gc::fill_opacity (int op) {
-}
-
-// ------------------------------------------------------------
-
 void postscript_gc::font (const std::string& name) {
   ps_text << '/' << name << " findfont\n";
 }
@@ -168,7 +157,7 @@ void postscript_gc::scaling (double hscale, double vscale) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::stroke_color (const std::string& name) {
+void postscript_gc::color (const std::string& name) {
 
   double r, g, b;
   decode_color(name, &r, &g, &b);

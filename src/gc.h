@@ -63,8 +63,6 @@ namespace timing {
     virtual void set_surface_size(double w, double h) = 0;
     virtual double get_label_width(const data &d) = 0;
     virtual void bezier (const std::list<Coordinate> &points) = 0;
-    virtual void fill_color (const std::string &name) = 0;
-    virtual void fill_opacity (int op) = 0;
     virtual void font (const std::string &name) = 0;
     virtual void line (int x1, int y1, int x2, int y2) = 0;
     virtual void point_size (int size) = 0;
@@ -72,7 +70,7 @@ namespace timing {
     virtual void pop (void) = 0;
     virtual void push (void) = 0;
     virtual void scaling (double hscale, double vscale) = 0;
-    virtual void stroke_color (const std::string &name) = 0;
+    virtual void color (const std::string &name) = 0;
     virtual void set_stroke_width (int w) = 0;
     virtual void text (int x, int y, const std::string &text) = 0;
   };
@@ -90,8 +88,6 @@ namespace timing {
     void set_surface_size(double w, double h);
     double get_label_width(const data &d);
     void bezier (const std::list<Coordinate> &points);
-    void fill_color (const std::string &name);
-    void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
@@ -99,7 +95,7 @@ namespace timing {
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
-    void stroke_color (const std::string &name);
+    void color (const std::string &name);
     void set_stroke_width (int w);
     void text (int x, int y, const std::string &text);
 

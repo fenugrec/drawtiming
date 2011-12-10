@@ -514,7 +514,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
   list<Coordinate> shaft, head;
 
   gc.push ();
-  gc.stroke_color ("blue");
+  gc.color ("blue");
 
   if (x0 == x1) {
     int w = vCellW/20, h = vCellHt/6, h2 = vCellHt/10;
@@ -522,7 +522,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
     if (y0 < y1) {
       y1 -= vCellHt/4;
       gc.line (x0, y0, x1, y1);
-      gc.fill_color ("blue");
+      gc.color ("blue");
       head.push_back (Coordinate (x1, y1));
       head.push_back (Coordinate (x1 - w, y1 - h));
       head.push_back (Coordinate (x1, y1 - h2));
@@ -532,7 +532,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
     else {
       y1 += vCellHt/4;
       gc.line (x0, y0, x1, y1);
-      gc.fill_color ("blue");
+      gc.color ("blue");
       head.push_back (Coordinate (x1, y1));
       head.push_back (Coordinate (x1 - w, y1 + h));
       head.push_back (Coordinate (x1, y1 + h2));
@@ -543,13 +543,13 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
   else {
     int h = vCellHt/10, w1 = vCellW/12, w2 = vCellW/20;
     x1 -= vCellW/16;
-    gc.fill_color ("blue");
+    gc.color ("blue");
     shaft.push_back (Coordinate (x0, y0));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
     shaft.push_back (Coordinate (x1, y1));
     gc.bezier (shaft);
-    gc.fill_color ("blue");
+    gc.color ("blue");
     head.push_back (Coordinate (x1, y1));
     head.push_back (Coordinate (x1 - w1, y1 - h));
     head.push_back (Coordinate (x1 - w2, y1));
@@ -567,7 +567,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
   list<Coordinate> head;
 
   gc.push ();
-  gc.stroke_color ("blue");
+  gc.color ("blue");
 
   if (x0 == x1)
     gc.line (x0, y0, x1, y1);
@@ -576,7 +576,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
     gc.line (x0, y0, x0, y2 + vCellHt/8);
     gc.line (x1, y1, x1, y2 - vCellHt/8);
     gc.line (x0, y2, x1, y2);
-    gc.fill_color ("blue");
+    gc.color ("blue");
     head.push_back (Coordinate (x1, y2));
     head.push_back (Coordinate (x1 - vCellW/12, y2 - vCellHt/10));
     head.push_back (Coordinate (x1 - vCellW/20, y2));
@@ -602,7 +602,7 @@ static void render_common (gc& gc, const data &d,
   // draw grid
   if(timing::draw_grid) {
     gc.set_stroke_width (vLineWidth);
-    gc.stroke_color ("lightgrey");
+    gc.color ("lightgrey");
     int x = labelWidth + vCellWtsep + vCellWtsep/2;
     for(int j; j <= d.maxlen; j++) {
       gc.line(x,0,x,gc.height);
@@ -611,7 +611,7 @@ static void render_common (gc& gc, const data &d,
   }
 
   gc.set_stroke_width (vLineWidth);
-  gc.stroke_color ("black");
+  gc.color ("black");
 
   // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;
@@ -704,11 +704,6 @@ void timing::decode_color (const std::string& name, double *r, double *g, double
     *r = 0.9;
     *g = 0.9;
     *b = 0.9;
-  }
-  else if (name == "none"){
-    *r = 0.0;
-    *g = 0.0;
-    *b = 0.0;
   }
   else {
     throw timing::exception();
