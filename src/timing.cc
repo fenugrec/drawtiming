@@ -29,7 +29,8 @@ using namespace std;
 using namespace timing;
 
 int timing::vFontPointsize = 12;
-int timing::vLineWidth = 1;
+int timing::vLineWidth = 2;
+int timing::vThinLineWidth = 1;
 int timing::vCellHt = 32;
 int timing::vCellW = 64;
 string timing::vFont = "Helvetica";
@@ -322,6 +323,9 @@ static void base_size (gc &gc, const data &d, int &w, int &h) {
   vCellHtdel=vCellHt/4;
   vCellWtsep=vCellW/4;
   vCellWrm=vCellW/8;
+  vThinLineWidth = vLineWidth / 2;
+  if (vThinLineWidth < 1)
+    vThinLineWidth = 1;
 
   w = vCellWrm*2 + gc.get_label_width(d) + vCellW * d.maxlen;
 
@@ -337,7 +341,7 @@ static void base_size (gc &gc, const data &d, int &w, int &h) {
 // add text to the diagram
 
 static void push_text (gc &gc, double xpos, double ypos, const string &text) {
-  gc.set_stroke_width (1);
+  gc.set_stroke_width (vThinLineWidth);
   gc.text (int (xpos), int (ypos), text);
   gc.set_stroke_width (vLineWidth);
 }
@@ -601,7 +605,7 @@ static void render_common (gc& gc, const data &d,
 
   // draw grid
   if(timing::draw_grid) {
-    gc.set_stroke_width (vLineWidth);
+    gc.set_stroke_width (1);
     gc.color ("lightgrey");
     int x = labelWidth + vCellWtsep + vCellWtsep/2;
     for(int j; j <= d.maxlen; j++) {
@@ -633,6 +637,7 @@ static void render_common (gc& gc, const data &d,
   }
 
   // draw the smooth arrows indicating the triggers for signal changes
+  gc.set_stroke_width (vThinLineWidth);
   for (list<depdata>::const_iterator i = d.dependencies.begin ();
        i != d.dependencies.end (); ++ i)
     draw_dependency (gc, labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_trigger,
@@ -641,6 +646,7 @@ static void render_common (gc& gc, const data &d,
                      vCellHt/2 + ypos[i->effect]);
 
   // draw the timing delay annotations
+  gc.set_stroke_width (vThinLineWidth);
   for (list<delaydata>::const_iterator i = d.delays.begin ();
        i != d.delays.end (); ++ i)
     draw_delay (gc, labelWidth + vCellWtsep + vCellWrm + vCellW * i->n_trigger,
@@ -701,9 +707,9 @@ void timing::decode_color (const std::string& name, double *r, double *g, double
     *b = 1.0;
   }
   else if (name == "lightgrey"){
-    *r = 0.9;
-    *g = 0.9;
-    *b = 0.9;
+    *r = 0.8;
+    *g = 0.8;
+    *b = 0.8;
   }
   else {
     throw timing::exception();

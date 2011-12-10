@@ -297,7 +297,7 @@ void usage (void) {
        << "    Font size (pt) [25]." << endl
        << "-l" << endl
        << "--line-width" << endl
-       << "    Line width (pixels) [3]." << endl
+       << "    Line width (pixels) [2]." << endl
        << "-g" << endl
        << "--grid" << endl
        << "    Turn on grid." << endl

@@ -197,8 +197,6 @@ void cairo_gc::color (const std::string& name)
 
 void cairo_gc::set_stroke_width (int w)
 {
-  if ((w & 1) == 1) ++w;
-
   double ux=w, uy=w;
   cairo_device_to_user_distance (cr, &ux, &uy);
   if (ux < uy)

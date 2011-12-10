@@ -44,7 +44,7 @@ namespace timing {
   typedef std::list<signame> signal_sequence;
   typedef std::list<sigvalue> value_sequence;
 
-  extern int vFontPointsize, vLineWidth, vCellHt, vCellW;
+  extern int vFontPointsize, vLineWidth, vThinLineWidth, vCellHt, vCellW;
   extern std::string vFont;
   extern bool draw_grid;
 
