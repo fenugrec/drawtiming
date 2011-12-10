@@ -1,4 +1,4 @@
-// Copyright (c)2004 by Edward Counce, All rights reserved. 
+// Copyright (c)2004 by Edward Counce, All rights reserved.
 // Copyright (c)2006-7 by Salvador E. Tropea, All rights reserved.
 // Copyright (c)2008 by Daniel Beer, All rights reserved.
 // This file is part of drawtiming.
@@ -24,9 +24,9 @@
 #include <map>
 #include <fstream>
 #include <string.h>
+
 using namespace std;
 using namespace timing;
-using namespace Magick;
 
 int timing::vFontPointsize = 12;
 int timing::vLineWidth = 1;
@@ -36,6 +36,22 @@ string timing::vFont = "Helvetica";
 
 static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
             vCellWrm;
+
+static std::string filename_ext(const std::string &fname)
+{
+  int i = fname.size () - 1;
+
+  while (i >= 0 && fname[i] != '.')
+    i--;
+
+  return std::string (fname, i + 1);
+}
+
+bool timing::has_ext (const std::string &filename, const std::string& ext) {
+
+  std::string fext = filename_ext (filename);
+  return strcasecmp(fext.c_str (), ext.c_str()) == 0;
+}
 
 // ------------------------------------------------------------
 
@@ -145,7 +161,7 @@ sigdata &data::find_signal (const signame &name) {
 
 const sigdata &data::find_signal (const signame &name) const {
   signal_database::const_iterator i = signals.find (name);
-  if (i == signals.end ()) 
+  if (i == signals.end ())
     throw not_found (name);
   return i->second;
 }
@@ -169,7 +185,7 @@ void data::add_dependency (const signame &name, const signame &dep) {
 // ------------------------------------------------------------
 
 void data::add_dependencies (const signame &name, const signal_sequence &deps) {
-  for (signal_sequence::const_iterator j = deps.begin (); j != deps.end (); ++ j) 
+  for (signal_sequence::const_iterator j = deps.begin (); j != deps.end (); ++ j)
     add_dependency (name, *j);
 }
 
@@ -215,7 +231,7 @@ void data::set_value (const signame &name, unsigned n, const sigvalue &value) {
   if (lastval.type == PULSE)
     lastval = sigvalue ("0", ZERO);
 
-  while (sig.data.size () < n) 
+  while (sig.data.size () < n)
     sig.data.push_back (lastval);
 
   // append the value to the sequence data
@@ -233,7 +249,7 @@ void data::pad (unsigned n) {
   if (n > maxlen)
     maxlen = n;
   for (signal_database::iterator i = signals.begin (); i != signals.end (); ++ i) {
-    sigvalue lastval = (i->second.data.size () == 0 ? sigvalue ("X", X) : 
+    sigvalue lastval = (i->second.data.size () == 0 ? sigvalue ("X", X) :
 			i->second.data.back ());
     if (lastval.type == PULSE)
       lastval = sigvalue ("0", ZERO);
@@ -253,12 +269,12 @@ ostream &operator<< (ostream &f, const sigvalue &data) {
 ostream &operator<< (ostream &f, const data &data) {
   f << "signals: " << endl;
   for (signal_sequence::const_iterator i = data.sequence.begin ();
-       i != data.sequence.end (); ++ i) 
+       i != data.sequence.end (); ++ i)
     f << "  " << *i << ": " << data.find_signal (*i) << endl;
 
   f << endl << "dependencies: " << endl;
   for (list<depdata>::const_iterator i = data.dependencies.begin ();
-       i != data.dependencies.end (); ++ i) 
+       i != data.dependencies.end (); ++ i)
     f << "  " << *i << endl;
 
   return f;
@@ -286,40 +302,9 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 }
 
 // ------------------------------------------------------------
-// calculate the required label width
-
-static int label_width (const data &d) {
-  int labelWidth = 0;
-
-#ifndef LITE
-  TypeMetric m;
-  Image img;
-
-  img.font (vFont);
-  img.fontPointsize(vFontPointsize);
-  for (signal_sequence::const_iterator i = d.sequence.begin ();
-       i != d.sequence.end (); ++ i) {
-    img.fontTypeMetrics (*i, &m);
-    if (m.textWidth () > labelWidth)
-      labelWidth = (int) m.textWidth ();
-  }
-#else
-  int m = 0;
-  for (signal_sequence::const_iterator i = d.sequence.begin ();
-       i != d.sequence.end (); ++ i) {
-    if ((*i).size() > m)
-      m = (*i).size();
-  }
-  labelWidth = (int)(0.7 * m * vFontPointsize);
-#endif /* LITE */
-
-  return labelWidth;
-}
-
-// ------------------------------------------------------------
 // calculate the basic height and width required before scaling
 
-static void base_size (const data &d, int &w, int &h) {
+static void base_size (gc &gc, const data &d, int &w, int &h) {
 
   vCellHsep = vCellHt / 8;
   vCellH=vCellHt-vCellHsep;
@@ -329,7 +314,7 @@ static void base_size (const data &d, int &w, int &h) {
   vCellWtsep=vCellW/4;
   vCellWrm=vCellW/8;
 
-  w = vCellWrm*2 + label_width (d) + vCellW * d.maxlen;
+  w = vCellWrm*2 + gc.get_label_width(d) + vCellW * d.maxlen;
 
   h = 0;
   for (signal_sequence::const_iterator i = d.sequence.begin ();
@@ -343,9 +328,9 @@ static void base_size (const data &d, int &w, int &h) {
 // add text to the diagram
 
 static void push_text (gc &gc, double xpos, double ypos, const string &text) {
-  gc.stroke_width (1);
+  gc.set_stroke_width (1);
   gc.text (int (xpos), int (ypos), text);
-  gc.stroke_width (vLineWidth);
+  gc.set_stroke_width (vLineWidth);
 }
 
 // ------------------------------------------------------------
@@ -364,7 +349,7 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
       gc.line (x, y + vCellHsep, x + vCellW/4, y + vCellH);
       gc.line (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH);
       break;
-    
+
     case Z:
       gc.line (x, y + vCellHt/2, x + vCellW/4, y + vCellH);
       gc.line (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH);
@@ -434,7 +419,7 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
       break;
     }
     break;
-  
+
   case UNDEF:
   case X:
     for (int i = 0; i < 4; ++ i) {
@@ -444,7 +429,7 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
 	       x+(i+1)*(vCellW/4), y + vCellH);
     }
     break;
-  
+
   case Z:
     switch (last.type) {
     default:
@@ -470,7 +455,7 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
       break;
     }
     break;
-  
+
   case STATE:
     switch (last.type) {
     default:
@@ -495,14 +480,14 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
       gc.line (x, y + vCellH, x + vCellW, y + vCellH);
       push_text (gc, x + vCellW/4, y + vCellHtxt, value.text);
       break;
-    
+
     case ONE:
       gc.line (x, y + vCellHsep, x + vCellW/4, y + vCellH);
       gc.line (x + vCellW/4, y + vCellH, x + vCellW, y + vCellH);
       gc.line (x, y + vCellHsep, x + vCellW, y + vCellHsep);
       push_text (gc, x + vCellW/4, y + vCellHtxt, value.text);
       break;
-    
+
     case Z:
       gc.line (x, y + vCellW/4, x + vCellW/8, y + vCellH);
       gc.line (x, y + vCellW/4, x + vCellW/8, y + vCellHsep);
@@ -576,7 +561,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
   gc.push ();
   gc.stroke_color ("blue");
 
-  if (x0 == x1) 
+  if (x0 == x1)
     gc.line (x0, y0, x1, y1);
   else {
     gc.text (x0 + vCellWtsep, y2 - vCellHt/16, text);
@@ -603,10 +588,10 @@ static void render_common (gc& gc, const data &d,
   gc.scaling (hscale, vscale);
   gc.font (vFont);
   gc.point_size (vFontPointsize);
-  gc.stroke_width (vLineWidth);
+  gc.set_stroke_width (vLineWidth);
   gc.stroke_color ("black");
 
-  int labelWidth = label_width (d);
+  int labelWidth = gc.get_label_width (d);
 
   // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;
@@ -652,10 +637,9 @@ static void render_common (gc& gc, const data &d,
 
 void timing::render (gc &gc, const data &d, double scale) {
   int base_width, base_height;
-  base_size (d, base_width, base_height);
+  base_size (gc, d, base_width, base_height);
 
-  gc.width = (int)(scale * base_width);
-  gc.height = (int)(scale * base_height);
+  gc.set_surface_size((int)(scale * base_width), (int)(scale * base_height));
 
   render_common (gc, d, scale, scale);
 }
@@ -664,10 +648,9 @@ void timing::render (gc &gc, const data &d, double scale) {
 
 void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect) {
   int base_width, base_height;
-  base_size (d, base_width, base_height);
+  base_size (gc, d, base_width, base_height);
 
-  gc.width = w;
-  gc.height = h;
+  gc.set_surface_size(w, h);
 
   double hscale = w / (double)base_width;
   double vscale = h / (double)base_height;
@@ -680,118 +663,404 @@ void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect) {
   render_common (gc, d, hscale, vscale);
 }
 
+static void decode_color (const std::string& name, double *r, double *g, double *b){
+
+  if (name == "blue") {
+    *r = 0.0;
+    *g = 0.0;
+    *b = 1.0;
+  }
+  else if (name == "black"){
+    *r = 0.0;
+    *g = 0.0;
+    *b = 0.0;
+  }
+  else if (name == "white"){
+    *r = 1.0;
+    *g = 1.0;
+    *b = 1.0;
+  }
+  else if (name == "none"){
+    *r = 0.0;
+    *g = 0.0;
+    *b = 0.0;
+  }
+  else {
+    throw timing::exception();
+  }
+}
+
 // ------------------------------------------------------------
 
 #ifndef LITE
-magick_gc::~magick_gc (void) {
-}
 
-// ------------------------------------------------------------
-
-void magick_gc::bezier (const std::list<Magick::Coordinate> &points) {
-  drawables.push_back (DrawableBezier (points));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::fill_color (const std::string &name) {
-  drawables.push_back (DrawableFillColor (name));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::fill_opacity (int op) {
-  drawables.push_back (DrawableFillOpacity (op));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::font (const std::string& name) {
-  drawables.push_back (DrawableFont (name, AnyStyle, 100, AnyStretch));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::line (int x1, int y1, int x2, int y2) {
-  drawables.push_back (DrawableLine (x1, y1, x2, y2));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::point_size (int size) {
-  drawables.push_back (DrawablePointSize (size));
-}
-
-// ------------------------------------------------------------
-
-void magick_gc::polygon (const std::list<Magick::Coordinate> &points)
+cairo_gc::cairo_gc (const std::string& filename) :
+  gc(filename),
+  surface(NULL),
+  cr(NULL),
+  fill_color_r(0.0),
+  fill_color_g(0.0),
+  fill_color_b(0.0),
+  fill_color_a(1.0),
+  stroke_color_r(0.0),
+  stroke_color_g(0.0),
+  stroke_color_b(0.0),
+  stroke_color_a(1.0)
 {
-  drawables.push_back (DrawablePolygon (points));
+}
+
+cairo_gc::~cairo_gc (void) {
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::pop (void)
-{
-  drawables.push_back (DrawablePopGraphicContext ());
+void cairo_gc::uniform_stroke(){
+  const double scale = (scale_x + scale_y) * 0.5;
+
+  cairo_save(cr);
+  cairo_identity_matrix(cr);
+  cairo_scale(cr, scale, scale);
+  cairo_set_font_size(cr, font_size);
+  cairo_set_line_width (cr, stroke_width);
+
+  cairo_stroke(cr);
+
+  cairo_restore(cr);
+}
+
+void cairo_gc::uniform_text(const std::string &text){
+  const double scale = (scale_x + scale_y) * 0.5;
+
+  cairo_save(cr);
+  cairo_identity_matrix(cr);
+  cairo_scale(cr, scale, scale);
+  cairo_set_font_size(cr, font_size);
+  cairo_set_line_width (cr, stroke_width);
+
+  cairo_show_text(cr, text.c_str());
+
+  cairo_restore(cr);
+}
+
+double cairo_gc::get_label_width(const data &d) {
+
+  double labelWidth = 0;
+  cairo_text_extents_t te;
+
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    cairo_text_extents (cr, i->c_str(), &te);
+    if (te.width > labelWidth)
+      labelWidth = te.width;
+  }
+
+  return labelWidth;
+}
+
+void cairo_gc::bezier (const std::list<Coordinate> &points) {
+
+  std::list<Coordinate>::const_iterator it0 = points.begin();
+  std::list<Coordinate>::const_iterator it1 = points.begin(); ++it1;
+  std::list<Coordinate>::const_iterator it2 = points.begin(); ++it2; ++it2;
+
+  cairo_move_to(cr, it0->x(), it0->y());
+  ++it0; ++it1; ++it2;
+
+  while(it2 != points.end())
+  {
+    cairo_curve_to(cr,
+      it0->x(), it0->y(),
+      it1->x(), it1->y(),
+      it2->x(), it2->y()
+    );
+
+    ++it0; ++it1; ++it2;
+  }
+
+  uniform_stroke();
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::push (void)
-{
-  drawables.push_back (DrawablePushGraphicContext ());
+void cairo_gc::fill_color (const std::string &name) {
+    decode_color(name, &fill_color_r, &fill_color_g, &fill_color_b);
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::scaling (double hscale, double vscale)
-{
-  drawables.push_back (DrawableScaling (hscale, vscale));
+void cairo_gc::fill_opacity (int op) {
+  fill_color_a = (op / 255.0);
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::stroke_color (const std::string& name)
-{
-  drawables.push_back (DrawableStrokeColor (name));
+void cairo_gc::font (const std::string& name) {
+  cairo_select_font_face (cr, name.c_str(), CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::stroke_width (int w)
-{
-  drawables.push_back (DrawableStrokeWidth (w));
+void cairo_gc::line (int x1, int y1, int x2, int y2) {
+
+  cairo_move_to(cr, x1, y1);
+  cairo_line_to(cr, x2, y2);
+  uniform_stroke();
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::text (int x, int y, const std::string &text)
-{
-  drawables.push_back (DrawableText (x, y, text));
+void cairo_gc::point_size (int size) {
+  cairo_set_font_size (cr, size);
+  font_size = size;
 }
 
 // ------------------------------------------------------------
 
-void magick_gc::draw (Magick::Image& img) const
+void cairo_gc::polygon (const std::list<Coordinate> &points)
 {
-  img.draw (drawables);
+  // Draw fill
+  std::list<Coordinate>::const_iterator it = points.begin();
+
+  cairo_move_to(cr, it->x(), it->y());
+  while(it != points.end())
+  {
+    cairo_line_to(cr, it->x(), it->y());
+    ++it;
+  }
+  cairo_close_path(cr);
+
+  cairo_set_source_rgba(cr, fill_color_r, fill_color_g, fill_color_b, fill_color_a);
+  cairo_fill(cr);
+  cairo_set_source_rgba(cr, stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a);
+
+  // Draw outline
+  it = points.begin();
+  cairo_move_to(cr, it->x(), it->y());
+  while(it != points.end())
+  {
+    cairo_line_to(cr, it->x(), it->y());
+    ++it;
+  }
+  cairo_close_path(cr);
+  uniform_stroke();
 }
+
+// ------------------------------------------------------------
+void cairo_gc::pop (void)
+{
+  cairo_restore(cr);
+}
+
+// ------------------------------------------------------------
+
+void cairo_gc::push (void)
+{
+  cairo_save(cr);
+}
+
+// ------------------------------------------------------------
+
+void cairo_gc::scaling (double hscale, double vscale)
+{
+  cairo_identity_matrix(cr);
+  cairo_scale(cr, hscale, vscale);
+  scale_x = hscale;
+  scale_y = vscale;
+}
+
+// ------------------------------------------------------------
+
+void cairo_gc::stroke_color (const std::string& name)
+{
+  decode_color(name, &stroke_color_r, &stroke_color_g, &stroke_color_b);
+
+  cairo_set_source_rgba(cr, stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a);
+}
+
+// ------------------------------------------------------------
+
+void cairo_gc::set_stroke_width (int w)
+{
+  if ((w & 1) == 1) ++w;
+
+  double ux=w, uy=w;
+  cairo_device_to_user_distance (cr, &ux, &uy);
+  if (ux < uy)
+    ux = uy;
+  cairo_set_line_width (cr, ux);
+
+  stroke_width = w;
+}
+
+// ------------------------------------------------------------
+
+void cairo_gc::text (int x, int y, const std::string &text)
+{
+  cairo_move_to(cr, x, y);
+  uniform_text(text);
+}
+
+void cairo_gc::set_surface_size(double w, double h){
+
+  if (cr != NULL){
+    cairo_destroy(cr);
+    cr = NULL;
+  }
+
+  if (surface != NULL){
+    cairo_surface_destroy(surface);
+    surface = NULL;
+  }
+
+  width = w;
+  height = h;
+
+  surface = create_surface();
+  if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+    throw timing::exception();
+
+  cr = cairo_create(surface);
+  if (cairo_status(cr) != CAIRO_STATUS_SUCCESS)
+    throw timing::exception();
+
+  stroke_color("white");
+  cairo_rectangle(cr, 0, 0, width, height);
+  cairo_fill(cr);
+}
+
+// ------------------------------------------------------------
+
+#ifdef CAIRO_HAS_PNG_FUNCTIONS
+cairo_png_gc::cairo_png_gc(const std::string& filename) :
+  cairo_gc(filename)
+{
+  set_surface_size(2, 2);
+}
+cairo_surface_t* cairo_png_gc::create_surface()
+{
+  return cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+}
+void cairo_png_gc::finish_surface() {
+  if (cairo_surface_write_to_png(surface, fname.c_str()) != CAIRO_STATUS_SUCCESS)
+    throw timing::exception();
+}
+#endif // CAIRO_HAS_PNG_FUNCTIONS
+
+#ifdef CAIRO_HAS_PDF_SURFACE
+cairo_pdf_gc::cairo_pdf_gc(const std::string& filename) :
+  cairo_gc(filename)
+{
+  set_surface_size(2, 2);
+}
+cairo_surface_t* cairo_pdf_gc::create_surface()
+{
+  return cairo_pdf_surface_create(fname.c_str(), width, height);
+}
+void cairo_pdf_gc::finish_surface(){
+}
+
+#endif // CAIRO_HAS_PDF_SURFACE
+
+#ifdef CAIRO_HAS_SVG_SURFACE
+cairo_svg_gc::cairo_svg_gc(const std::string& filename) :
+  cairo_gc(filename)
+{
+  set_surface_size(2, 2);
+}
+cairo_surface_t* cairo_svg_gc::create_surface()
+{
+  return cairo_svg_surface_create(fname.c_str(), width, height);
+}
+void cairo_svg_gc::finish_surface(){
+}
+#endif // CAIRO_HAS_SVG_SURFACE
+
+#ifdef CAIRO_HAS_PS_SURFACE
+cairo_ps_gc::cairo_ps_gc(const std::string& filename) :
+  cairo_gc(filename)
+{
+  set_surface_size(2, 2);
+}
+cairo_surface_t* cairo_ps_gc::create_surface()
+{
+  return cairo_ps_surface_create(fname.c_str(), width, height);
+}
+void cairo_ps_gc::finish_surface(){
+}
+
+cairo_eps_gc::cairo_eps_gc(const std::string& filename) :
+  cairo_gc(filename)
+{
+  set_surface_size(2, 2);
+}
+cairo_surface_t* cairo_eps_gc::create_surface()
+{
+  cairo_surface_t* surf = cairo_ps_surface_create(fname.c_str(), width, height);
+  cairo_ps_surface_set_eps(surf, 1);
+  return surf;
+}
+void cairo_eps_gc::finish_surface(){
+}
+#endif // CAIRO_HAS_PS_SURFACE
 
 #endif /* ! LITE */
 
 // ------------------------------------------------------------
 
-postscript_gc::postscript_gc (void) {
+postscript_gc::postscript_gc (const std::string& filename) :
+    gc(filename)
+{
 }
 
 postscript_gc::~postscript_gc (void) {
 }
 
+void postscript_gc::finish_surface() {
+  std::ofstream out;
+
+  out.exceptions (ofstream::failbit | ofstream::badbit);
+  out.open (fname.c_str());
+
+  std::string ext = filename_ext (fname);
+
+  if (!strcasecmp (ext.c_str (), "eps")) {
+    out << "%!PS-Adobe-3.0 EPSF-3.0\n";
+    out << "%%BoundingBox: 0 0 " << width << ' ' << height << '\n';
+    print (out);
+  } else {
+    out << "%!PS-Adobe-3.0\n";
+    print (out);
+    out << "showpage\n";
+  }
+
+  out << "%%EOF\n";
+}
+
 // ------------------------------------------------------------
 
-void postscript_gc::bezier (const std::list<Magick::Coordinate> &points) {
-  std::list<Magick::Coordinate>::const_iterator i = points.begin();
+void postscript_gc::set_surface_size(double w, double h){
+  width = w;
+  height = h;
+}
+
+double postscript_gc::get_label_width(const data &d) {
+  double labelWidth = 0;
+
+  int m = 0;
+  for (signal_sequence::const_iterator i = d.sequence.begin ();
+       i != d.sequence.end (); ++ i) {
+    if ((*i).size() > m)
+      m = (*i).size();
+  }
+  labelWidth = (int)(0.7 * m * vFontPointsize);
+
+  return labelWidth;
+}
+
+void postscript_gc::bezier (const std::list<Coordinate> &points) {
+  std::list<Coordinate>::const_iterator i = points.begin();
 
   ps_text << "newpath\n";
   ps_text << i->x () << ' ' << (height - i->y ()) << " moveto\n";
@@ -840,9 +1109,9 @@ void postscript_gc::point_size (int size) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::polygon (const std::list<Magick::Coordinate> &points) {
+void postscript_gc::polygon (const std::list<Coordinate> &points) {
   static const char *ops[] = {"stroke", "fill"};
-  std::list<Magick::Coordinate>::const_iterator i;
+  std::list<Coordinate>::const_iterator i;
   int j;
 
   for (j = 0; j < 2; j++) {
@@ -890,7 +1159,7 @@ void postscript_gc::stroke_color (const std::string& name) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::stroke_width (int w) {
+void postscript_gc::set_stroke_width (int w) {
   ps_text << w << " setlinewidth\n";
 }
 
@@ -916,50 +1185,9 @@ void postscript_gc::text (int x, int y, const std::string& text) {
 
 // ------------------------------------------------------------
 
-static std::string filename_ext(const std::string &fname)
-{
-  int i = fname.size () - 1;
-
-  while (i >= 0 && fname[i] != '.')
-    i--;
-
-  return std::string (fname, i + 1);
-}
-
-// ------------------------------------------------------------
-
 void postscript_gc::print (std::ostream& out) const {
   out << ps_text.str();
 }
 
 // ------------------------------------------------------------
 
-void postscript_gc::print (const std::string& filename) const {
-  std::ofstream out;
-
-  out.exceptions (ofstream::failbit | ofstream::badbit);
-  out.open (filename.c_str());
-
-  std::string ext = filename_ext (filename);
-
-  if (!strcasecmp (ext.c_str (), "eps")) {
-    out << "%!PS-Adobe-3.0 EPSF-3.0\n";
-    out << "%%BoundingBox: 0 0 " << width << ' ' << height << '\n';
-    print (out);
-  } else {
-    out << "%!PS-Adobe-3.0\n";
-    print (out);
-    out << "showpage\n";
-  }
-
-  out << "%%EOF\n";
-}
-
-// ------------------------------------------------------------
-
-bool postscript_gc::has_ps_ext (const std::string &filename) {
-  std::string ext = filename_ext (filename);
-
-  return !(strcasecmp (ext.c_str (), "ps") &&
-    	   strcasecmp (ext.c_str (), "eps"));
-}

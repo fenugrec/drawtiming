@@ -27,10 +27,9 @@
 #  include <unistd.h>
 #  define getopt_long(C,V,S,O,I) getopt(C,V,S)
 #endif
+#include <cstdio>
+#include <cstdlib>
 using namespace std;
-#ifndef LITE
-using namespace Magick;
-#endif /* ! LITE */
 
 #define FLAG_PAGESIZE 1
 #define FLAG_SCALE 2
@@ -103,7 +102,7 @@ int main (int argc, char *argv[]) {
     case 'a':
     case OPT_ASPECT:
       flags |= FLAG_ASPECT;
-      break;    
+      break;
     case 'c':
     case OPT_CELL_HEIGHT:
       timing::vCellHt = atoi (optarg);
@@ -114,7 +113,7 @@ int main (int argc, char *argv[]) {
     case 'f':
     case OPT_FONT_SIZE:
       timing::vFontPointsize = atoi (optarg);
-      break;    
+      break;
     case 'h':
     case OPT_HELP:
       usage ();
@@ -123,7 +122,7 @@ int main (int argc, char *argv[]) {
     case 'l':
     case OPT_LINE_WIDTH:
       timing::vLineWidth = atoi (optarg);
-      break;    
+      break;
     case 'o':
     case OPT_OUTPUT:
       outfile = optarg;
@@ -151,7 +150,7 @@ int main (int argc, char *argv[]) {
     case 'w':
     case OPT_CELL_WIDTH:
       timing::vCellW = atoi (optarg);
-      break;    
+      break;
     }
 
   if (optind >= argc) {
@@ -181,7 +180,7 @@ int main (int argc, char *argv[]) {
   try {
     for (int i = optind; i < argc; ++ i) {
       yyin = fopen (argv[i], "rt");
-      if (yyin == NULL) 
+      if (yyin == NULL)
 	perror (argv[i]);
       else {
 	if (yyparse () != 0)
@@ -197,28 +196,36 @@ int main (int argc, char *argv[]) {
     if (outfile.empty ())
       return 0;
 
-    if (timing::postscript_gc::has_ps_ext (outfile)) {
-      timing::postscript_gc gc;
-      render_it (gc, flags, width, height, 1.0);
-
-      gc.print (outfile);
-    } else {
+      timing::gc* gc = NULL;
 #ifndef LITE
-      timing::magick_gc gc;
-      render_it (gc, flags, width, height, scale);
+      if (timing::has_ext(outfile, "png"))
+        gc = new timing::cairo_png_gc(outfile);
+      else if (timing::has_ext(outfile, "svg"))
+        gc = new timing::cairo_svg_gc(outfile);
+      else if (timing::has_ext(outfile, "pdf"))
+        gc = new timing::cairo_pdf_gc(outfile);
+      else if (timing::has_ext(outfile, "ps"))
+        gc = new timing::cairo_ps_gc(outfile);
+      else if (timing::has_ext(outfile, "eps"))
+        gc = new timing::cairo_eps_gc(outfile);
+      else{
+        cerr << "Unknown output file format. Valid are png, svg, pdf, ps and eps." << endl;
+        return 2;
+      }
+#else
+      if (timing::has_ext (outfile, "ps") || timing::has_ext (outfile, "eps")) {
+        gc = new timing::postscript_gc(outfile);
+      }
+      else{
+        cerr << "Unknown output file format. Valid are ps and eps." << endl;
+        return 2;
+      }
+#endif /* ! LITE */
 
-      Image img (Geometry (gc.width, gc.height), "white");
-      gc.draw (img);
-      img.write (outfile);
-#endif /* ! LITE */
-    }
+      render_it (*gc, flags, width, height, scale);
+      gc->finish_surface();
+      delete gc;
   }
-#ifndef LITE
-  catch (Magick::Exception &err) {
-    cerr << "caught Magick++ exception: " << err.what () << endl;
-    return 2;
-  }
-#endif /* ! LITE */
   catch (timing::exception &err) {
     cerr << "caught timing exception: " << err.what () << endl;
     return 2;
@@ -235,6 +242,7 @@ void freesoft (void) {
 
 void banner (void) {
   cout << "drawtiming " VERSION << " + postscript patches" << endl
+       << "Copyright (c) 2011 by Karoly Pados" << endl
        << "Copyright (c) 2004-2007 by Edward Counce" << endl
        << "Copyright (c) 2006-2007 by Salvador E. Tropea" << endl
        << "Copyright (c) 2008 by Daniel Beer" << endl;
@@ -255,12 +263,8 @@ void usage (void) {
        << "-o <filename>" << endl
        << "--output <filename>" << endl
        << "    Required to produce an output image. The output format is determined" << endl
-       << "    from the filename. For more details on this, consult the ImageMagick" << endl
-       << "    documentation and the ImageMagick(1) man page" << endl
-       << endl
-       << "    In addition to the formats supported by ImageMagick, Postscript " << endl
-       << "    output can be generated (this is enabled when the output filename's " << endl
-       << "    extension is either \"ps\" or \"eps\")." << endl
+       << "    from the filename. When compiled with cairo, the output format can be" << endl
+       << "    png, svg, pdf, ps or eps. Otherwise only ps or eps." << endl
        << "-x <float>" << endl
        << "--scale <float>" << endl
        << "    Scales the canvas size on which to render. This option has no effect" << endl

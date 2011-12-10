@@ -26,11 +26,12 @@
 #include <sstream>
 #include <exception>
 #ifndef LITE
-#include <Magick++.h>
-#else /* LITE */
+#include <cairo.h>
+#include <cairo-svg.h>
+#include <cairo-pdf.h>
+#include <cairo-ps.h>
+#endif
 
-namespace Magick
-{
   struct Coordinate
   {
     double _x, _y;
@@ -43,9 +44,7 @@ namespace Magick
     double x (void) const { return _x; }
     double y (void) const { return _y; }
   };
-};
 
-#endif /* LITE */
 
 namespace timing {
 
@@ -123,81 +122,153 @@ namespace timing {
   };
 
   class gc {
-  public:
-    int width, height;
 
-    gc (void) : width(0), height(0) { }
+  protected:
+    std::string fname;
+    int width, height;
+    double scale_x, scale_y;
+
+  public:
+
+    gc (const std::string& filename) :
+         fname(filename),
+         width(0), height(0),
+         scale_x(1), scale_y(1)
+    { }
     virtual ~gc() { }
 
-    virtual void bezier (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void finish_surface() = 0;
+    virtual void set_surface_size(double w, double h) = 0;
+    virtual double get_label_width(const data &d) = 0;
+    virtual void bezier (const std::list<Coordinate> &points) = 0;
     virtual void fill_color (const std::string &name) = 0;
     virtual void fill_opacity (int op) = 0;
     virtual void font (const std::string &name) = 0;
     virtual void line (int x1, int y1, int x2, int y2) = 0;
     virtual void point_size (int size) = 0;
-    virtual void polygon (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void polygon (const std::list<Coordinate> &points) = 0;
     virtual void pop (void) = 0;
     virtual void push (void) = 0;
     virtual void scaling (double hscale, double vscale) = 0;
     virtual void stroke_color (const std::string &name) = 0;
-    virtual void stroke_width (int w) = 0;
+    virtual void set_stroke_width (int w) = 0;
     virtual void text (int x, int y, const std::string &text) = 0;
   };
 
 #ifndef LITE
-  class magick_gc : public gc {
-    std::list<Magick::Drawable> drawables;
+
+  class cairo_gc : public gc {
+  protected:
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+  private:
+    double fill_color_r, fill_color_g, fill_color_b, fill_color_a;
+    double stroke_color_r, stroke_color_g, stroke_color_b, stroke_color_a;
+    int stroke_width;
+    int font_size;
+
+    void uniform_stroke();
+    void uniform_text(const std::string &text);
 
   public:
-    ~magick_gc (void);
+    cairo_gc (const std::string& filename);
+    virtual ~cairo_gc (void);
 
-    void bezier (const std::list<Magick::Coordinate> &points);
+    virtual cairo_surface_t* create_surface() = 0;
+    virtual void finish_surface() = 0;
+
+    void set_surface_size(double w, double h);
+    double get_label_width(const data &d);
+    void bezier (const std::list<Coordinate> &points);
     void fill_color (const std::string &name);
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
-    void polygon (const std::list<Magick::Coordinate> &points);
+    void polygon (const std::list<Coordinate> &points);
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
     void stroke_color (const std::string &name);
-    void stroke_width (int w);
+    void set_stroke_width (int w);
     void text (int x, int y, const std::string &text);
-
-    void draw (Magick::Image& img) const;
   };
+
+#ifdef CAIRO_HAS_PNG_FUNCTIONS
+  class cairo_png_gc : public cairo_gc {
+  public:
+    cairo_png_gc(const std::string& filename);
+    cairo_surface_t* create_surface();
+    void finish_surface();
+  };
+#endif
+
+#ifdef CAIRO_HAS_PDF_SURFACE
+  class cairo_pdf_gc : public cairo_gc {
+  public:
+    cairo_pdf_gc(const std::string& filename);
+    cairo_surface_t* create_surface();
+    void finish_surface();
+  };
+#endif
+
+#ifdef CAIRO_HAS_SVG_SURFACE
+  class cairo_svg_gc : public cairo_gc {
+  public:
+    cairo_svg_gc(const std::string& filename);
+    cairo_surface_t* create_surface();
+    void finish_surface();
+  };
+#endif
+
+#ifdef CAIRO_HAS_PS_SURFACE
+  class cairo_ps_gc : public cairo_gc {
+  public:
+    cairo_ps_gc(const std::string& filename);
+    cairo_surface_t* create_surface();
+    void finish_surface();
+  };
+  class cairo_eps_gc : public cairo_gc {
+  public:
+    cairo_eps_gc(const std::string& filename);
+    cairo_surface_t* create_surface();
+    void finish_surface();
+  };
+#endif
 
 #endif /* ! LITE */
   class postscript_gc : public gc {
     std::ostringstream ps_text;
 
   public:
-    postscript_gc (void);
-    ~postscript_gc (void);
+    postscript_gc (const std::string& filename);
+    virtual ~postscript_gc (void);
 
-    void bezier (const std::list<Magick::Coordinate> &points);
+    void finish_surface(void);
+    void set_surface_size(double w, double h);
+    double get_label_width(const data &d);
+    void bezier (const std::list<Coordinate> &points);
     void fill_color (const std::string &name);
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
-    void polygon (const std::list<Magick::Coordinate> &points);
+    void polygon (const std::list<Coordinate> &points);
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
     void stroke_color (const std::string &name);
-    void stroke_width (int w);
+    void set_stroke_width (int w);
     void text (int x, int y, const std::string &text);
 
     void print (std::ostream& out) const;
-    void print (const std::string& filename) const;
-
-    static bool has_ps_ext (const std::string& filename);
   };
 
+  bool has_ext (const std::string &filename, const std::string& ext);
   void render (gc &gc, const data &d, double scale);
   void render (gc &gc, const data &d, int w, int h, bool fixAspect);
+
 };
 
 std::ostream &operator<< (std::ostream &f, const timing::data &d);
