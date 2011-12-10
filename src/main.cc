@@ -54,6 +54,7 @@ enum option_t {
     OPT_CELL_WIDTH,
     OPT_FONT,
     OPT_FONT_SIZE,
+    OPT_GRID,
     OPT_HELP,
     OPT_LINE_WIDTH,
     OPT_OUTPUT,
@@ -71,6 +72,7 @@ struct option opts[] = {
   {"cell-width", required_argument, NULL, OPT_CELL_WIDTH},
   {"font", required_argument, NULL, OPT_FONT},
   {"font-size", required_argument, NULL, OPT_FONT_SIZE},
+  {"grid", no_argument, NULL, OPT_GRID},
   {"help", no_argument, NULL, OPT_HELP},
   {"line-width", required_argument, NULL, OPT_LINE_WIDTH},
   {"output", required_argument, NULL, OPT_OUTPUT},
@@ -97,7 +99,7 @@ int main (int argc, char *argv[]) {
   int flags = 0;
 
   int k, c;
-  while ((c = getopt_long (argc, argv, "ac:f:hl:o:p:vVw:x:", opts, &k)) != -1)
+  while ((c = getopt_long (argc, argv, "ac:f:ghl:o:p:vVw:x:", opts, &k)) != -1)
     switch (c) {
     case 'a':
     case OPT_ASPECT:
@@ -114,6 +116,10 @@ int main (int argc, char *argv[]) {
     case OPT_FONT_SIZE:
       timing::vFontPointsize = atoi (optarg);
       break;
+    case 'g':
+    case OPT_GRID:
+      timing::draw_grid = true;
+      break;    
     case 'h':
     case OPT_HELP:
       usage ();
@@ -292,6 +298,9 @@ void usage (void) {
        << "-l" << endl
        << "--line-width" << endl
        << "    Line width (pixels) [3]." << endl
+       << "-g" << endl
+       << "--grid" << endl
+       << "    Turn on grid." << endl
        << endl
        << "Consult the drawtiming(1) man page for details." << endl;
 }

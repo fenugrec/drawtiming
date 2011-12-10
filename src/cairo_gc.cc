@@ -45,6 +45,11 @@ static void decode_color (const std::string& name, double *r, double *g, double 
     *g = 1.0;
     *b = 1.0;
   }
+  else if (name == "lightgrey"){
+    *r = 0.9;
+    *g = 0.9;
+    *b = 0.9;
+  }
   else if (name == "none"){
     *r = 0.0;
     *g = 0.0;

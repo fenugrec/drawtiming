@@ -33,6 +33,7 @@ int timing::vLineWidth = 1;
 int timing::vCellHt = 32;
 int timing::vCellW = 64;
 string timing::vFont = "Helvetica";
+bool timing::draw_grid = false;
 
 static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
             vCellWrm;
@@ -596,10 +597,22 @@ static void render_common (gc& gc, const data &d,
   gc.scaling (hscale, vscale);
   gc.font (vFont);
   gc.point_size (vFontPointsize);
-  gc.set_stroke_width (vLineWidth);
-  gc.stroke_color ("black");
 
   int labelWidth = gc.get_label_width (d);
+
+  // draw grid
+  if(timing::draw_grid) {
+    gc.set_stroke_width (vLineWidth);
+    gc.stroke_color ("lightgrey");
+    int x = labelWidth + vCellWtsep + vCellWtsep/2;
+    for(int j; j <= d.maxlen; j++) {
+      gc.line(x,0,x,gc.height);
+      x += vCellW;
+    }
+  }
+
+  gc.set_stroke_width (vLineWidth);
+  gc.stroke_color ("black");
 
   // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;

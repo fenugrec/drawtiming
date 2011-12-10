@@ -46,6 +46,7 @@ namespace timing {
 
   extern int vFontPointsize, vLineWidth, vCellHt, vCellW;
   extern std::string vFont;
+  extern bool draw_grid;
 
   class exception : public std::exception {
   };
