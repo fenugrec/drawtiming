@@ -169,10 +169,11 @@ void postscript_gc::scaling (double hscale, double vscale) {
 // ------------------------------------------------------------
 
 void postscript_gc::stroke_color (const std::string& name) {
-  if (name == "black")
-    ps_text << "0.0 0.0 0.0 setrgbcolor\n";
-  else
-    ps_text << "0.0 0.0 1.0 setrgbcolor\n";
+
+  double r, g, b;
+  decode_color(name, &r, &g, &b);
+
+  ps_text << fixed << r << " " << g << " " << b << " setrgbcolor\n";
 }
 
 // ------------------------------------------------------------

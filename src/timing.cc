@@ -543,8 +543,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
   else {
     int h = vCellHt/10, w1 = vCellW/12, w2 = vCellW/20;
     x1 -= vCellW/16;
-    gc.fill_color ("none");
-    gc.fill_opacity (0);
+    gc.fill_color ("blue");
     shaft.push_back (Coordinate (x0, y0));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
@@ -682,5 +681,37 @@ void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect) {
   }
 
   render_common (gc, d, hscale, vscale);
+}
+
+void timing::decode_color (const std::string& name, double *r, double *g, double *b){
+
+  if (name == "blue") {
+    *r = 0.0;
+    *g = 0.0;
+    *b = 1.0;
+  }
+  else if (name == "black"){
+    *r = 0.0;
+    *g = 0.0;
+    *b = 0.0;
+  }
+  else if (name == "white"){
+    *r = 1.0;
+    *g = 1.0;
+    *b = 1.0;
+  }
+  else if (name == "lightgrey"){
+    *r = 0.9;
+    *g = 0.9;
+    *b = 0.9;
+  }
+  else if (name == "none"){
+    *r = 0.0;
+    *g = 0.0;
+    *b = 0.0;
+  }
+  else {
+    throw timing::exception();
+  }
 }
 

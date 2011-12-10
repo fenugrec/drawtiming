@@ -28,38 +28,6 @@
 
 using namespace timing;
 
-static void decode_color (const std::string& name, double *r, double *g, double *b){
-
-  if (name == "blue") {
-    *r = 0.0;
-    *g = 0.0;
-    *b = 1.0;
-  }
-  else if (name == "black"){
-    *r = 0.0;
-    *g = 0.0;
-    *b = 0.0;
-  }
-  else if (name == "white"){
-    *r = 1.0;
-    *g = 1.0;
-    *b = 1.0;
-  }
-  else if (name == "lightgrey"){
-    *r = 0.9;
-    *g = 0.9;
-    *b = 0.9;
-  }
-  else if (name == "none"){
-    *r = 0.0;
-    *g = 0.0;
-    *b = 0.0;
-  }
-  else {
-    throw timing::exception();
-  }
-}
-
 // ------------------------------------------------------------
 
 cairo_gc::cairo_gc (const std::string& filename) :

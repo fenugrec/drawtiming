@@ -106,6 +106,7 @@ namespace timing {
   bool has_ext (const std::string &filename, const std::string& ext);
   void render (gc &gc, const data &d, double scale);
   void render (gc &gc, const data &d, int w, int h, bool fixAspect);
+  void decode_color (const std::string& name, double *r, double *g, double *b);
 
 };
 
