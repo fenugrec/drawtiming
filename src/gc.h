@@ -20,6 +20,10 @@
 #ifndef __TIMING_GC_H
 #define __TIMING_GC_H
 
+#ifdef LITE
+#include <sstream>
+#endif
+
   struct Coordinate
   {
     double _x, _y;
@@ -42,10 +46,11 @@ namespace timing {
 
   protected:
     std::string fname;
-    int width, height;
     double scale_x, scale_y;
 
   public:
+
+    int width, height;
 
     gc (const std::string& filename) :
          fname(filename),
@@ -73,6 +78,7 @@ namespace timing {
   };
 
 #ifdef LITE
+
   class postscript_gc : public gc {
     std::ostringstream ps_text;
 
