@@ -607,7 +607,7 @@ static void render_common (gc& gc, const data &d,
   if(timing::draw_grid) {
     gc.set_stroke_width (1);
     gc.color ("lightgrey");
-    int x = labelWidth + vCellWtsep + vCellWtsep/2;
+    int x = labelWidth + vCellWtsep;
     for(int j; j <= d.maxlen; j++) {
       gc.line(x,0,x,gc.height);
       x += vCellW;
