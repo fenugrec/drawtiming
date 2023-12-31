@@ -2,9 +2,17 @@ Migrated on 2023/12/31 with kde-svn2git according to recommendations from the do
 	https://stackoverflow.com/questions/2752168/convert-svn-subdirectory-to-git
 	https://www.jeffgeerling.com/blogs/jeff-geerling/switching-svn-repository-svn2git
 
+
+*** steps used :
+
 1. rsync -av svn.code.sf.net::p/drawtiming rsync_svn
  (includes also the website contents, which I split out and is not part of this repo)
 2. tweak author map and rules
 3. svn-all-fast-export --identity-map account-map --rules rules  --add-metadata rsync_svn/code
 4. tags : tweaked rules and used mini script from jeffgeerling.com 
 5. inspect newly created bare repos
+
+
+*** note about drawtiming.sourceforge.net website contents
+It was converted to a git repo and deleted since it contained only one commit.
+However the contents used to be part of this repo, and may still be examined by checking out commit 52d2a8622835a145f73913bbe04e7f3bd21d2deb
