@@ -1,0 +1,10 @@
+Migrated on 2023/12/31 with kde-svn2git according to recommendations from the docs as well as
+	https://stackoverflow.com/questions/2752168/convert-svn-subdirectory-to-git
+	https://www.jeffgeerling.com/blogs/jeff-geerling/switching-svn-repository-svn2git
+
+1. rsync -av svn.code.sf.net::p/drawtiming rsync_svn
+ (includes also the website contents, which I split out and is not part of this repo)
+2. tweak author map and rules
+3. svn-all-fast-export --identity-map account-map --rules rules  --add-metadata rsync_svn/code
+4. tags : tweaked rules and used mini script from jeffgeerling.com 
+5. inspect newly created bare repos

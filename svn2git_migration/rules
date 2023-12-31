@@ -1,0 +1,51 @@
+create repository drawtiming
+end repository
+
+create repository website
+end repository
+
+match /trunk/
+  repository drawtiming
+  branch master
+end match
+
+match /website/
+  repository website
+  branch master
+end match
+
+match /branches/([^/]+)/
+  repository drawtiming
+  branch \1
+end match
+
+# Important:
+# Subversion doesn't understand the Git concept of tags
+# In Subversion, tags are really branches
+#
+# Only a post-processing (i.e., after converting to Git) of the tag
+# branches can we be sure that a tag wasn't moved or changed from the
+# branch it was copied from
+#
+# This rule will create tags that don't exist in any of the
+# branches. It's not what you want.
+# See the merged-branches-tags.rules file
+#match /tags/([^/]+)/
+#  repository myproject
+#  branch refs/tags/\1
+#end match
+
+
+## from merged-branches-tags.rules :
+#match /(branches|tags)/([^/]+)/
+#  repository drawtiming
+#  branch \2
+#end match
+
+
+# Add a prefix to all tag branches so we can fix them later.
+match /tags/([^/]+)/
+  repository drawtiming
+  branch tag--\1
+end match
+
