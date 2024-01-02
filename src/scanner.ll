@@ -21,7 +21,7 @@
 #  include <config.h>
 #endif
 #include "globals.h"
-#include "parser.h"
+#include "parser.hh"
 %}
 
 %option yylineno
