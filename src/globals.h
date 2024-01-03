@@ -22,7 +22,7 @@
 #define YYSTYPE std::string
 
 extern unsigned n;
-extern timing::data data;
+extern timing::data tdata;
 extern timing::signal_sequence deps;
 
 #endif

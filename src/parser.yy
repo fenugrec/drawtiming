@@ -24,6 +24,8 @@
 void yyerror (const char *s);
 extern int yylineno;
 int yylex (void);
+
+using namespace timing;
 %}
 
 %token SYMBOL STRING CAUSE DELAY
@@ -42,13 +44,13 @@ statements:
 statement { $$ = $1; deps.push_back ($1); }
 | statements ',' statement { $$ = $3; deps.push_back ($3); }
 | statements ';' statement { $$ = $3; deps.clear (); deps.push_back ($3); }
-| statements CAUSE statement { $$ = $3; data.add_dependencies ($3, deps); 
+| statements CAUSE statement { $$ = $3; tdata.add_dependencies ($3, deps);
     deps.clear (); deps.push_back ($3); }
-| statements DELAY statement { $$ = $3; data.add_delay ($3, $1, $2); }
+| statements DELAY statement { $$ = $3; tdata.add_delay ($3, $1, $2); }
 
 statement:
-SYMBOL '=' SYMBOL { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3)); }
-| SYMBOL '=' STRING { $$ = $1; data.set_value ($1, n, timing::sigvalue ($3, timing::STATE)); }
+SYMBOL '=' SYMBOL { $$ = $1; tdata.set_value ($1, n, timing::sigvalue ($3)); }
+| SYMBOL '=' STRING { $$ = $1; tdata.set_value ($1, n, timing::sigvalue ($3, timing::STATE)); }
 | SYMBOL { $$ = $1; };
 
 %%

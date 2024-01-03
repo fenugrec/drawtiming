@@ -24,15 +24,20 @@
 #include <map>
 #include <fstream>
 #include <string.h>
-using namespace std;
+
 using namespace timing;
 using namespace Magick;
+using namespace std;    //"not recommended"
+// is this seriously the alternative to "namespace std" ?
+//using std::endl;
+//using std::ofstream;
+//using std::ostream;
 
 int timing::vFontPointsize = 12;
 int timing::vLineWidth = 1;
 int timing::vCellHt = 32;
 int timing::vCellW = 64;
-string timing::vFont = "Helvetica";
+std::string timing::vFont = "Helvetica";
 
 static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
             vCellWrm;
@@ -122,7 +127,7 @@ data::data (const data &d) {
 
 // ------------------------------------------------------------
 
-data &data::operator= (const data &d) {
+timing::data &data::operator= (const data &d) {
   maxlen = d.maxlen;
   signals = d.signals;
   sequence = d.sequence;
@@ -175,7 +180,7 @@ void data::add_dependencies (const signame &name, const signal_sequence &deps) {
 
 // ------------------------------------------------------------
 
-void data::add_delay (const signame &name, const signame &dep, const string &text) {
+void data::add_delay (const signame &name, const signame &dep, const std::string &text) {
   // a delay always indicates a dependency
   // (but would require a way to select which is rendered)
   // add_dependency (name, dep);
@@ -250,7 +255,7 @@ ostream &operator<< (ostream &f, const sigvalue &data) {
 
 // ------------------------------------------------------------
 
-ostream &operator<< (ostream &f, const data &data) {
+ostream &operator<< (ostream &f, const timing::data &data) {
   f << "signals: " << endl;
   for (signal_sequence::const_iterator i = data.sequence.begin ();
        i != data.sequence.end (); ++ i) 
@@ -288,7 +293,7 @@ ostream &operator<< (ostream &f, const depdata &dep) {
 // ------------------------------------------------------------
 // calculate the required label width
 
-static int label_width (const data &d) {
+static int label_width (const timing::data &d) {
   int labelWidth = 0;
 
 #ifndef LITE
@@ -319,7 +324,7 @@ static int label_width (const data &d) {
 // ------------------------------------------------------------
 // calculate the basic height and width required before scaling
 
-static void base_size (const data &d, int &w, int &h) {
+static void base_size (const timing::data &d, int &w, int &h) {
 
   vCellHsep = vCellHt / 8;
   vCellH=vCellHt-vCellHsep;
@@ -342,7 +347,7 @@ static void base_size (const data &d, int &w, int &h) {
 // ------------------------------------------------------------
 // add text to the diagram
 
-static void push_text (gc &gc, double xpos, double ypos, const string &text) {
+static void push_text (gc &gc, double xpos, double ypos, const std::string &text) {
   gc.stroke_width (1);
   gc.text (int (xpos), int (ypos), text);
   gc.stroke_width (vLineWidth);
@@ -570,7 +575,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
 // ------------------------------------------------------------
 
 static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
-			const string &text) {
+			const std::string &text) {
   list<Coordinate> head;
 
   gc.push ();
@@ -596,7 +601,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
 
 // ------------------------------------------------------------
 
-static void render_common (gc& gc, const data &d,
+static void render_common (gc& gc, const timing::data &d,
     			   double hscale, double vscale) {
 
   gc.push ();

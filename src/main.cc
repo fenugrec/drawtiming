@@ -44,7 +44,7 @@ static void banner (void);
 static void freesoft (void);
 
 unsigned n;
-timing::data data;
+timing::data tdata;
 timing::signal_sequence deps;
 string outfile;
 int verbose = 0;
@@ -87,9 +87,9 @@ static void render_it (timing::gc& gc, int flags,
     		       int width, int height, double scale)
 {
   if (flags & FLAG_PAGESIZE)
-    render (gc, data, width, height, (flags & FLAG_ASPECT));
+    render (gc, tdata, width, height, (flags & FLAG_ASPECT));
   else
-    render (gc, data, scale);
+    render (gc, tdata, scale);
 }
 
 int main (int argc, char *argv[]) {
@@ -190,9 +190,9 @@ int main (int argc, char *argv[]) {
       }
     }
 
-    data.pad (n);
+    tdata.pad (n);
     if (verbose)
-      cout << data;
+      cout << tdata;
 
     if (outfile.empty ())
       return 0;
