@@ -108,6 +108,7 @@ namespace timing {
   class gc {
   public:
     int width, height;
+    bool highlightRows;
 
     gc (void) : width(0), height(0) { }
     virtual ~gc() { }
@@ -125,6 +126,7 @@ namespace timing {
     virtual void stroke_color (const std::string &name) = 0;
     virtual void stroke_width (int w) = 0;
     virtual void text (int x, int y, const std::string &text) = 0;
+    virtual void drawrect (int x1, int y1, int x2, int y2) = 0;
   };
 
 #ifndef LITE
@@ -139,6 +141,7 @@ namespace timing {
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
+    void drawrect (int x1, int y1, int x2, int y2);
     void point_size (int size);
     void polygon (const Magick::CoordinateList &points);
     void pop (void);
@@ -164,6 +167,7 @@ namespace timing {
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
+    void drawrect (int x1, int y1, int x2, int y2);
     void point_size (int size);
     void polygon (const Magick::CoordinateList &points);
     void pop (void);
@@ -179,8 +183,8 @@ namespace timing {
     static bool has_ps_ext (const std::string& filename);
   };
 
-  void render (gc &gc, const data &d, double scale);
-  void render (gc &gc, const data &d, int w, int h, bool fixAspect);
+  void render (gc &gc, const data &d, double scale, bool highlightRows);
+  void render (gc &gc, const data &d, int w, int h, bool fixAspect,bool highlightRows);
 };
 
 std::ostream &operator<< (std::ostream &f, const timing::data &d);

@@ -619,12 +619,25 @@ static void render_common (gc& gc, const timing::data &d,
   // draw a "scope-like" diagram for each signal
   map<signame,int> ypos;
   int y = 0;
+  const int num_row_colors = 4;
+  string row_colors[] = { "white","grey", "white","CornflowerBlue"};
+  int cur_row_color_idx = 0;
   for (signal_sequence::const_iterator i = d.sequence.begin ();
        i != d.sequence.end (); ++ i) {
     const sigdata &sig = d.find_signal (*i);
-    push_text (gc, vCellWrm, y + vCellHtxt, *i);
     ypos[*i] = y;
     int x = labelWidth + vCellWtsep;
+    if (gc.highlightRows) {
+      string cur_row_color = row_colors[cur_row_color_idx];
+      gc.stroke_color (cur_row_color);
+      gc.fill_color(cur_row_color);
+      gc.drawrect(0,y,x+sig.data.size()*vCellW,y+vCellHt);
+      gc.stroke_color ("black");
+      gc.fill_color("black");
+      cur_row_color_idx++;
+      cur_row_color_idx = cur_row_color_idx%num_row_colors;
+    }
+    push_text (gc, vCellWrm, y + vCellHtxt, *i);
     sigvalue last;
     for (value_sequence::const_iterator j = sig.data.begin ();
 	 j != sig.data.end (); ++ j) {
@@ -658,24 +671,26 @@ static void render_common (gc& gc, const timing::data &d,
 
 // ------------------------------------------------------------
 
-void timing::render (gc &gc, const data &d, double scale) {
+void timing::render (gc &gc, const data &d, double scale, bool highlightRows) {
   int base_width, base_height;
   base_size (d, base_width, base_height);
 
   gc.width = (int)(scale * base_width);
   gc.height = (int)(scale * base_height);
+  gc.highlightRows = highlightRows;
 
   render_common (gc, d, scale, scale);
 }
 
 // ------------------------------------------------------------
 
-void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect) {
+void timing::render (gc &gc, const data &d, int w, int h, bool fixAspect, bool highlightRows) {
   int base_width, base_height;
   base_size (d, base_width, base_height);
 
   gc.width = w;
   gc.height = h;
+  gc.highlightRows = highlightRows;
 
   double hscale = w / (double)base_width;
   double vscale = h / (double)base_height;
@@ -722,6 +737,10 @@ void magick_gc::font (const std::string& name) {
 
 void magick_gc::line (int x1, int y1, int x2, int y2) {
   drawables.push_back (DrawableLine (x1, y1, x2, y2));
+}
+
+void magick_gc::drawrect(int x1, int y1, int x2, int y2) {
+  drawables.push_back (DrawableRectangle (x1,y1,x2,y2));
 }
 
 // ------------------------------------------------------------
@@ -838,6 +857,17 @@ void postscript_gc::line (int x1, int y1, int x2, int y2) {
   ps_text << x1 << ' ' << (height - y1) << " moveto\n";
   ps_text << x2 << ' ' << (height - y2) << " lineto\n";
   ps_text << "stroke\n";
+}
+
+void postscript_gc::drawrect(int x1, int y1, int x2, int y2) {
+  Magick::CoordinateList points;
+  points.push_back (Magick::Coordinate (x1, y1));
+  points.push_back (Magick::Coordinate (x1, y2));
+  points.push_back (Magick::Coordinate (x2, y2));
+  points.push_back (Magick::Coordinate (x2, y1));
+  points.push_back (Magick::Coordinate (x1, y1));
+  
+  polygon (points);
 }
 
 // ------------------------------------------------------------

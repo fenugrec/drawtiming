@@ -35,6 +35,7 @@ using namespace Magick;
 #define FLAG_PAGESIZE 1
 #define FLAG_SCALE 2
 #define FLAG_ASPECT 4
+#define FLAG_HIGHLIGHT_ROWS 8
 
 extern FILE *yyin;
 extern int yydebug;
@@ -59,6 +60,7 @@ enum option_t {
 	OPT_COLOR_FOREGROUND,
 	OPT_COLOR_DEPEND,
     OPT_HELP,
+    OPT_HIGHLIGHT_ROWS,
     OPT_LINE_WIDTH,
     OPT_OUTPUT,
     OPT_SCALE,
@@ -79,6 +81,7 @@ struct option opts[] = {
   {"font", required_argument, NULL, OPT_FONT},
   {"font-size", required_argument, NULL, OPT_FONT_SIZE},
   {"help", no_argument, NULL, OPT_HELP},
+  {"highlight-rows",no_argument, NULL, OPT_HIGHLIGHT_ROWS},
   {"line-width", required_argument, NULL, OPT_LINE_WIDTH},
   {"output", required_argument, NULL, OPT_OUTPUT},
   {"scale", required_argument, NULL, OPT_SCALE},
@@ -93,9 +96,9 @@ static void render_it (timing::gc& gc, int flags,
     		       int width, int height, double scale)
 {
   if (flags & FLAG_PAGESIZE)
-    render (gc, tdata, width, height, (flags & FLAG_ASPECT));
+    render (gc, tdata, width, height, (flags & FLAG_ASPECT),(flags & FLAG_HIGHLIGHT_ROWS));
   else
-    render (gc, tdata, scale);
+    render (gc, tdata, scale,(flags & FLAG_HIGHLIGHT_ROWS));
 }
 
 int main (int argc, char *argv[]) {
@@ -166,7 +169,10 @@ int main (int argc, char *argv[]) {
     case 'w':
     case OPT_CELL_WIDTH:
       timing::vCellW = atoi (optarg);
-      break;    
+      break;
+    case OPT_HIGHLIGHT_ROWS:
+      flags |= FLAG_HIGHLIGHT_ROWS;
+      break;
     }
 
   if (optind >= argc) {
@@ -289,6 +295,8 @@ void usage (void) {
        << "-v" << endl
        << "--verbose" << endl
        << "    Increases the quantity of diagnostic output." << endl
+       << "--highlight-rows" << endl
+       << "    Whether rows should be highlighted different colors for readability." << endl
        << "-c" << endl
        << "--cell-height" << endl
        << "    Height of the signal (pixels) [48]." << endl
