@@ -17,7 +17,7 @@ AC_ARG_WITH([magick],
   [], [with_magick=check])
 
 AS_IF([test "x$with_magick" != "xno"],
-  [PKG_CHECK_MODULES([MAGICK], [ImageMagick])],
+  [PKG_CHECK_MODULES([MAGICKXX], [Magick++])],
   [AC_DEFINE([LITE],[1],[Build without ImageMagick])])
 
 AC_CONFIG_FILES([Makefile drawtiming.spec src/Makefile doc/Makefile samples/Makefile])
