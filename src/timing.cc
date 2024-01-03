@@ -522,7 +522,7 @@ static void draw_transition (gc &gc, int x, int y, const sigvalue &last,
 // ------------------------------------------------------------
 
 static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
-  list<Coordinate> shaft, head;
+  CoordinateList shaft, head;
 
   gc.push ();
   gc.stroke_color ("blue");
@@ -576,7 +576,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
 
 static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
 			const std::string &text) {
-  list<Coordinate> head;
+  std::vector<Coordinate> head;
 
   gc.push ();
   gc.stroke_color ("blue");
@@ -693,7 +693,7 @@ magick_gc::~magick_gc (void) {
 
 // ------------------------------------------------------------
 
-void magick_gc::bezier (const std::list<Magick::Coordinate> &points) {
+void magick_gc::bezier (const Magick::CoordinateList &points) {
   drawables.push_back (DrawableBezier (points));
 }
 
@@ -729,7 +729,7 @@ void magick_gc::point_size (int size) {
 
 // ------------------------------------------------------------
 
-void magick_gc::polygon (const std::list<Magick::Coordinate> &points)
+void magick_gc::polygon (const Magick::CoordinateList &points)
 {
   drawables.push_back (DrawablePolygon (points));
 }
@@ -795,8 +795,8 @@ postscript_gc::~postscript_gc (void) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::bezier (const std::list<Magick::Coordinate> &points) {
-  std::list<Magick::Coordinate>::const_iterator i = points.begin();
+void postscript_gc::bezier (const Magick::CoordinateList &points) {
+  std::vector<Magick::Coordinate>::const_iterator i = points.begin();
 
   ps_text << "newpath\n";
   ps_text << i->x () << ' ' << (height - i->y ()) << " moveto\n";
@@ -845,9 +845,9 @@ void postscript_gc::point_size (int size) {
 
 // ------------------------------------------------------------
 
-void postscript_gc::polygon (const std::list<Magick::Coordinate> &points) {
+void postscript_gc::polygon (const Magick::CoordinateList &points) {
   static const char *ops[] = {"stroke", "fill"};
-  std::list<Magick::Coordinate>::const_iterator i;
+  Magick::CoordinateList::const_iterator i;
   int j;
 
   for (j = 0; j < 2; j++) {

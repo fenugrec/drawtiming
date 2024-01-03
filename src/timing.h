@@ -112,13 +112,13 @@ namespace timing {
     gc (void) : width(0), height(0) { }
     virtual ~gc() { }
 
-    virtual void bezier (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void bezier (const Magick::CoordinateList &points) = 0;
     virtual void fill_color (const std::string &name) = 0;
     virtual void fill_opacity (int op) = 0;
     virtual void font (const std::string &name) = 0;
     virtual void line (int x1, int y1, int x2, int y2) = 0;
     virtual void point_size (int size) = 0;
-    virtual void polygon (const std::list<Magick::Coordinate> &points) = 0;
+    virtual void polygon (const Magick::CoordinateList &points) = 0;
     virtual void pop (void) = 0;
     virtual void push (void) = 0;
     virtual void scaling (double hscale, double vscale) = 0;
@@ -129,18 +129,18 @@ namespace timing {
 
 #ifndef LITE
   class magick_gc : public gc {
-    std::list<Magick::Drawable> drawables;
+    std::vector<Magick::Drawable> drawables;
 
   public:
     ~magick_gc (void);
 
-    void bezier (const std::list<Magick::Coordinate> &points);
+    void bezier (const Magick::CoordinateList &points);
     void fill_color (const std::string &name);
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
-    void polygon (const std::list<Magick::Coordinate> &points);
+    void polygon (const Magick::CoordinateList &points);
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
@@ -159,13 +159,13 @@ namespace timing {
     postscript_gc (void);
     ~postscript_gc (void);
 
-    void bezier (const std::list<Magick::Coordinate> &points);
+    void bezier (const Magick::CoordinateList &points);
     void fill_color (const std::string &name);
     void fill_opacity (int op);
     void font (const std::string &name);
     void line (int x1, int y1, int x2, int y2);
     void point_size (int size);
-    void polygon (const std::list<Magick::Coordinate> &points);
+    void polygon (const Magick::CoordinateList &points);
     void pop (void);
     void push (void);
     void scaling (double hscale, double vscale);
