@@ -38,6 +38,9 @@ int timing::vLineWidth = 1;
 int timing::vCellHt = 32;
 int timing::vCellW = 64;
 std::string timing::vFont = "Helvetica";
+std::string timing::vColor_Bg = "white";
+std::string timing::vColor_Fg = "black";
+std::string timing::vColor_Dep = "blue";
 
 static int vCellHsep, vCellH, vCellHtxt, vCellHdel, vCellHtdel, vCellWtsep,
             vCellWrm;
@@ -525,7 +528,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
   CoordinateList shaft, head;
 
   gc.push ();
-  gc.stroke_color ("blue");
+  gc.stroke_color (timing::vColor_Dep);
 
   if (x0 == x1) {
     int w = vCellW/20, h = vCellHt/6, h2 = vCellHt/10;
@@ -533,7 +536,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
     if (y0 < y1) {
       y1 -= vCellHt/4;
       gc.line (x0, y0, x1, y1);
-      gc.fill_color ("blue");
+      gc.fill_color (timing::vColor_Dep);
       head.push_back (Coordinate (x1, y1));
       head.push_back (Coordinate (x1 - w, y1 - h));
       head.push_back (Coordinate (x1, y1 - h2));
@@ -543,7 +546,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
     else {
       y1 += vCellHt/4;
       gc.line (x0, y0, x1, y1);
-      gc.fill_color ("blue");
+      gc.fill_color (timing::vColor_Dep);
       head.push_back (Coordinate (x1, y1));
       head.push_back (Coordinate (x1 - w, y1 + h));
       head.push_back (Coordinate (x1, y1 + h2));
@@ -561,7 +564,7 @@ static void draw_dependency (gc &gc, int x0, int y0, int x1, int y1) {
     shaft.push_back (Coordinate ((x0 + x1) / 2, y1));
     shaft.push_back (Coordinate (x1, y1));
     gc.bezier (shaft);
-    gc.fill_color ("blue");
+    gc.fill_color (timing::vColor_Dep);
     head.push_back (Coordinate (x1, y1));
     head.push_back (Coordinate (x1 - w1, y1 - h));
     head.push_back (Coordinate (x1 - w2, y1));
@@ -579,7 +582,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
   std::vector<Coordinate> head;
 
   gc.push ();
-  gc.stroke_color ("blue");
+  gc.stroke_color (timing::vColor_Dep);
 
   if (x0 == x1) 
     gc.line (x0, y0, x1, y1);
@@ -588,7 +591,7 @@ static void draw_delay (gc &gc, int x0, int y0, int x1, int y1, int y2,
     gc.line (x0, y0, x0, y2 + vCellHt/8);
     gc.line (x1, y1, x1, y2 - vCellHt/8);
     gc.line (x0, y2, x1, y2);
-    gc.fill_color ("blue");
+    gc.fill_color (timing::vColor_Dep);
     head.push_back (Coordinate (x1, y2));
     head.push_back (Coordinate (x1 - vCellW/12, y2 - vCellHt/10));
     head.push_back (Coordinate (x1 - vCellW/20, y2));
@@ -609,7 +612,7 @@ static void render_common (gc& gc, const timing::data &d,
   gc.font (vFont);
   gc.point_size (vFontPointsize);
   gc.stroke_width (vLineWidth);
-  gc.stroke_color ("black");
+  gc.stroke_color (timing::vColor_Fg);
 
   int labelWidth = label_width (d);
 

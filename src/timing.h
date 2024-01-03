@@ -48,7 +48,7 @@ namespace timing {
   typedef std::list<sigvalue> value_sequence;
 
   extern int vFontPointsize, vLineWidth, vCellHt, vCellW;
-  extern std::string vFont;
+  extern std::string vFont, vColor_Bg, vColor_Fg, vColor_Dep;
 
   class exception : public std::exception {
   };

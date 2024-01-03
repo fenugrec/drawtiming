@@ -30,6 +30,9 @@
 .Op Fl -aspect
 .Op Fl -cell-height Ar H
 .Op Fl -cell-width Ar W
+.Op Fl -color-bg Ar Cbg
+.Op Fl -color-fg Ar Cfg
+.Op Fl -color-dep Ar Cdp
 .Op Fl -font-size Ar pts
 .Op Fl -line-width Ar W
 .Fl -output Ar target
@@ -60,7 +63,13 @@ Maintain fixed aspect ratio if \-\-pagesize given.
 .It Fl -cell-height Ar H
 Height of the each signal in pixels. Default is 32.
 .It Fl -cell-width Ar W
-Width for the time unit in pixels. Defaults is 64.
+Width for the time unit in pixels. Default is 64.
+.It Fl -color-bg Ar Cbg
+Background color name. Default is white.
+.It Fl -color-fg Ar Cfg
+Foreground color name. Default is black.
+.It Fl -color-dep Ar Cdp
+Dependency color name. Default is blue.
 .It Fl -font-size Ar pts
 Font size in pts. Default is 18.
 .It Fl -line-width Ar W

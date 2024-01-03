@@ -55,6 +55,9 @@ enum option_t {
     OPT_CELL_WIDTH,
     OPT_FONT,
     OPT_FONT_SIZE,
+	OPT_COLOR_BACKGROUND,
+	OPT_COLOR_FOREGROUND,
+	OPT_COLOR_DEPEND,
     OPT_HELP,
     OPT_LINE_WIDTH,
     OPT_OUTPUT,
@@ -70,6 +73,9 @@ struct option opts[] = {
   {"aspect", no_argument, NULL, OPT_ASPECT},
   {"cell-height", required_argument, NULL, OPT_CELL_HEIGHT},
   {"cell-width", required_argument, NULL, OPT_CELL_WIDTH},
+  {"color-bg", required_argument, NULL, OPT_COLOR_BACKGROUND},
+  {"color-fg", required_argument, NULL, OPT_COLOR_FOREGROUND},
+  {"color-dep", required_argument, NULL, OPT_COLOR_DEPEND},
   {"font", required_argument, NULL, OPT_FONT},
   {"font-size", required_argument, NULL, OPT_FONT_SIZE},
   {"help", no_argument, NULL, OPT_HELP},
@@ -108,6 +114,15 @@ int main (int argc, char *argv[]) {
     case OPT_CELL_HEIGHT:
       timing::vCellHt = atoi (optarg);
       break;
+	case OPT_COLOR_BACKGROUND:
+	  timing::vColor_Bg=optarg;
+	  break;
+	case OPT_COLOR_FOREGROUND:
+	  timing::vColor_Fg=optarg;
+	  break;
+	case OPT_COLOR_DEPEND:
+	  timing::vColor_Dep=optarg;
+	  break;
     case OPT_FONT:
       timing::vFont = optarg;
       break;
@@ -207,7 +222,7 @@ int main (int argc, char *argv[]) {
       timing::magick_gc gc;
       render_it (gc, flags, width, height, scale);
 
-      Image img (Geometry (gc.width, gc.height), "white");
+      Image img (Geometry (gc.width, gc.height), timing::vColor_Bg);
       gc.draw (img);
       img.write (outfile);
 #endif /* ! LITE */
@@ -280,7 +295,13 @@ void usage (void) {
        << "-w" << endl
        << "--cell-width" << endl
        << "    Width of the time unit (pixels) [64]." << endl
-       << "--font <name>" << endl
+       << "--color-bg" << endl
+	   << "    Background color name [white]." << endl
+       << "--color-fg" << endl
+	   << "    Foreground color name [black]." << endl
+       << "--color-dep" << endl
+	   << "    Dependency ground color name [blue]." << endl
+	   << "--font <name>" << endl
        << "    Font [Helvetica]" << endl
        << "-f" << endl
        << "--font-size" << endl
