@@ -25,26 +25,9 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+
 #ifndef LITE
 #include <Magick++.h>
-#else /* LITE */
-
-namespace Magick
-{
-  struct Coordinate
-  {
-    double _x, _y;
-
-    Coordinate (double x, double y) {
-      _x = x;
-      _y = y;
-    }
-
-    double x (void) const { return _x; }
-    double y (void) const { return _y; }
-  };
-};
-
 #endif /* LITE */
 
 namespace timing {
