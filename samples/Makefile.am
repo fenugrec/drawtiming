@@ -1,4 +1,4 @@
-TESTS = runsamples.sh
+TESTS = runsamples.sh runlite.sh
 EXTRA_DIST = runsamples.sh memory.txt sample.txt statement1.txt guenter.txt
 CLEANFILES = memory.gif sample.gif statement1.gif sample640x480.gif guenter.gif
 
