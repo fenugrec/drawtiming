@@ -25,9 +25,39 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
-
 #ifndef LITE
 #include <Magick++.h>
+
+#else /* LITE */
+
+#include <vector>
+namespace Magick {
+  class Coordinate {
+  public:
+     Coordinate(void)
+        : _x(0),
+	  _y(0) {}
+  
+      Coordinate(double x_,double y_)
+        : _x(x_),
+	  _y(y_) {}
+  
+      virtual ~Coordinate() {}
+  
+      void x(double x_) { _x=x_; }
+      double x(void) const { return _x; }
+  
+      void y(double y_) { _y=y_; }
+      double y(void) const { return _y; }
+  
+    private:
+      double _x;
+      double _y;
+  };
+
+  typedef std::vector<Magick::Coordinate> CoordinateList;
+};
+
 #endif /* LITE */
 
 namespace timing {
