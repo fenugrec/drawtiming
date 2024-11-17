@@ -229,7 +229,8 @@ int main (int argc, char *argv[]) {
       render_it (gc, flags, width, height, scale);
 
       Image img (Geometry (gc.width, gc.height), timing::vColor_Bg);
-      gc.draw (img);
+      img.font (timing::vFont);
+      gc.draw (img);	    
       img.write (outfile);
 #endif /* ! LITE */
     }
