@@ -33,6 +33,7 @@
 .Op Fl -color-bg Ar Cbg
 .Op Fl -color-fg Ar Cfg
 .Op Fl -color-dep Ar Cdp
+.Op Fl -font Ar fontname
 .Op Fl -font-size Ar pts
 .Op Fl -highlight-rows
 .Op Fl -line-width Ar W
@@ -71,6 +72,8 @@ Background color name. Default is white.
 Foreground color name. Default is black.
 .It Fl -color-dep Ar Cdp
 Dependency color name. Default is blue.
+.It Fl -font Ar fontname
+Set font for text elements. If using magick backend, run 'magick list -font' to see available options. Font must be specified by name (replacing spaces with dashes), not by family, e.g. 'arial', 'helvetica-bold', etc.
 .It Fl -font-size Ar pts
 Font size in pts. Default is 18.
 .It Fl -highlight-rows

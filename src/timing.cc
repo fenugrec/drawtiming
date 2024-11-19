@@ -730,7 +730,7 @@ void magick_gc::fill_opacity (int op) {
 // ------------------------------------------------------------
 
 void magick_gc::font (const std::string& name) {
-  drawables.push_back (DrawableFont (name, AnyStyle, 100, AnyStretch));
+  drawables.push_back (DrawableFont (name));
 }
 
 // ------------------------------------------------------------
